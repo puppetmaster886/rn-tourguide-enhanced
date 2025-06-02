@@ -62,7 +62,7 @@ import {
 // Add <TourGuideProvider/> at the root of you app!
 function App() {
   return (
-// If you added a statusbar in Andoid set androidStatusBarVisible: true as well to avoid vertical position issues
+    // If you added a statusbar in Andoid set androidStatusBarVisible: true as well to avoid vertical position issues
     <TourGuideProvider {...{ borderRadius: 16 }}>
       <AppContent />
     </TourGuideProvider>
@@ -370,12 +370,11 @@ List of available events is:
 - `stop` — Copilot tutorial has ended or skipped.
 - `stepChange` — Next step is triggered. Passes [`Step`](https://github.com/mohebifar/react-native-copilot/blob/master/src/types.js#L2) instance as event handler argument.
 
-
 ### Prevent Outside Interaction
 
 Sometimes you need to prevent users to interact with app while tour is shown, in such case `preventOutsideInteraction` prop is up for you.
 
-```default: false```
+`default: false`
 
 ```jsx
 <TourGuideProvider preventOutsideInteraction>

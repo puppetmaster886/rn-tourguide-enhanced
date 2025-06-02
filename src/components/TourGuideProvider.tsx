@@ -1,20 +1,20 @@
 import mitt, { Emitter } from 'mitt'
 import * as React from 'react'
 import {
+  Dimensions,
   findNodeHandle,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
-  Dimensions,
 } from 'react-native'
-import { TourGuideContext, Ctx } from './TourGuideContext'
 import { useIsMounted } from '../hooks/useIsMounted'
 import { IStep, Labels, StepObject, Steps } from '../types'
 import * as utils from '../utilities'
 import { Modal } from './Modal'
 import { OFFSET_WIDTH } from './style'
 import { TooltipProps } from './Tooltip'
+import { Ctx, TourGuideContext } from './TourGuideContext'
 
 const { useMemo, useEffect, useState, useRef } = React
 /*
@@ -184,9 +184,8 @@ export const TourGuideProvider = ({
             return newStep
           })
           resolve()
-        }, 100);
-      }
-      else {
+        }, 100)
+      } else {
         updateCurrentStep((currentStep) => {
           const newStep = { ...currentStep }
           newStep[key] = step
@@ -195,7 +194,6 @@ export const TourGuideProvider = ({
         })
         resolve()
       }
-      
     })
 
   const getNextStep = (

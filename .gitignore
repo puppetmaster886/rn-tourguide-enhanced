@@ -42,3 +42,6 @@ jsconfig.json
 .expo/
 lib/
 web-build/
+
+
+FORK_INTEGRATION_PLAN.md

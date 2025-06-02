@@ -251,11 +251,17 @@ export class Modal extends React.Component<ModalProps, State> {
         currentStep: this.props.currentStep,
       })
       animations.push(opacityAnim)
-    } else if (
+    } else {
+      // Even with persistTooltip, we need to update the step content
+      this.setState({
+        isFirstStep: this.props.isFirstStep,
+        isLastStep: this.props.isLastStep,
+        currentStep: this.props.currentStep,
+      })
       // @ts-ignore
-      this.state.opacity._value !== 1
-    ) {
-      animations.push(opacityAnim)
+      if (this.state.opacity._value !== 1) {
+        animations.push(opacityAnim)
+      }
     }
     Animated.parallel(animations).start()
 
@@ -324,7 +330,19 @@ export class Modal extends React.Component<ModalProps, State> {
       return null
     }
 
-    const { opacity } = this.state
+    const { opacity, tooltip } = this.state
+
+    // Only apply horizontal styles when tooltipLeftOffset is defined
+    const hasCustomLeftOffset =
+      this.props.currentStep?.tooltipLeftOffset !== undefined
+    const horizontalStyles = hasCustomLeftOffset
+      ? {
+          left: (tooltip as any).left,
+          right: (tooltip as any).right,
+          maxWidth: (tooltip as any).maxWidth,
+        }
+      : {}
+
     return (
       <Animated.View
         pointerEvents='box-none'
@@ -332,6 +350,7 @@ export class Modal extends React.Component<ModalProps, State> {
         style={[
           styles.tooltip,
           this.props.tooltipStyle,
+          horizontalStyles, // Apply only when tooltipLeftOffset is defined
           {
             zIndex: 99,
             opacity,

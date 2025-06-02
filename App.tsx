@@ -37,121 +37,73 @@ function App() {
 
 const AppContent = () => {
   const iconProps = { size: 40, color: '#888' }
-  const scrollRef = React.useRef(null)
-  // Use Hooks to control!
+  const scrollRef = React.useRef<ScrollView>(null)
+
+  // Main tour controller
   const { start, canStart, stop, eventEmitter } = useTourGuideController()
 
+  // Secondary tour controller with tourKey
+  const {
+    start: startAdvanced,
+    canStart: canStartAdvanced,
+    stop: stopAdvanced,
+    eventEmitter: eventEmitterAdvanced,
+  } = useTourGuideController('advanced')
+
   React.useEffect(() => {
-    // start at mount
+    // start main tour at mount
     if (canStart) {
       start(1, scrollRef)
     }
   }, [canStart]) // wait until everything is registered
 
   React.useEffect(() => {
-    eventEmitter.on('start', () => console.log('start'))
-    eventEmitter.on('stop', () => console.log('stop'))
-    eventEmitter.on('stepChange', () => console.log(`stepChange`))
-    return () => eventEmitter.off('*', null)
-  }, [])
+    if (eventEmitter) {
+      const startHandler = () => console.log('Main tour started')
+      const stopHandler = () => console.log('Main tour stopped')
+      const stepChangeHandler = () => console.log('Main tour stepChange')
+
+      eventEmitter.on('start', startHandler)
+      eventEmitter.on('stop', stopHandler)
+      eventEmitter.on('stepChange', stepChangeHandler)
+
+      return () => {
+        eventEmitter.off('start', startHandler)
+        eventEmitter.off('stop', stopHandler)
+        eventEmitter.off('stepChange', stepChangeHandler)
+      }
+    }
+  }, [eventEmitter])
+
+  React.useEffect(() => {
+    if (eventEmitterAdvanced) {
+      const startHandler = () => console.log('Advanced tour started')
+      const stopHandler = () => console.log('Advanced tour stopped')
+      const stepChangeHandler = () => console.log('Advanced tour stepChange')
+
+      eventEmitterAdvanced.on('start', startHandler)
+      eventEmitterAdvanced.on('stop', stopHandler)
+      eventEmitterAdvanced.on('stepChange', stepChangeHandler)
+
+      return () => {
+        eventEmitterAdvanced.off('start', startHandler)
+        eventEmitterAdvanced.off('stop', stopHandler)
+        eventEmitterAdvanced.off('stepChange', stepChangeHandler)
+      }
+    }
+  }, [eventEmitterAdvanced])
   return (
     <ScrollView
-      ref={(r) => {
-        scrollRef.current = r
-      }}
+      ref={scrollRef}
       contentContainerStyle={{ flexGrow: 1 }}
       scrollEventThrottle={16}
       keyboardShouldPersistTaps={'always'}
     >
       <View style={styles.container}>
         {/* Use TourGuideZone only to wrap */}
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-        <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
         <TourGuideZone
           keepTooltipPosition
-          zone={6}
+          zone={2}
           text={'A react-native-copilot remastered! 🎉'}
           borderRadius={16}
         >
@@ -175,10 +127,52 @@ const AppContent = () => {
           <TouchableOpacity style={styles.button} onPress={stop}>
             <Text style={styles.buttonText}>Stop</Text>
           </TouchableOpacity>
+
+          {/* Advanced Tour Controls */}
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#e67e22' }]}
+            onPress={() => startAdvanced()}
+          >
+            <Text style={styles.buttonText}>START ADVANCED TOUR</Text>
+          </TouchableOpacity>
+
+          {/* Advanced Tour Zones */}
           <TourGuideZone
+            tourKey='advanced'
+            zone={1}
+            shape='rectangle'
+            text={
+              'Advanced Tour: This is the first step of the advanced tutorial'
+            }
+          >
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#8e44ad' }]}
+            >
+              <Text style={styles.buttonText}>Advanced Zone 1</Text>
+            </TouchableOpacity>
+          </TourGuideZone>
+
+          <TourGuideZone
+            tourKey='advanced'
+            zone={2}
+            shape='rectangle'
+            text={
+              'Advanced Tour: This demonstrates multiple independent tours running separately'
+            }
+          >
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#27ae60' }]}
+            >
+              <Text style={styles.buttonText}>Advanced Zone 2</Text>
+            </TouchableOpacity>
+          </TourGuideZone>
+          <TourGuideZone
+            tourKey='advanced'
             zone={7}
-            shape='circle'
-            text={'With animated SVG morphing with awesome flubber 🍮💯'}
+            shape='rectangle'
+            text={
+              'Advanced Tour: Image with animated SVG morphing with awesome flubber 🍮💯'
+            }
           >
             <Image source={{ uri }} style={styles.profilePhoto} />
           </TourGuideZone>
@@ -189,16 +183,33 @@ const AppContent = () => {
           </TourGuideZone>
           <Ionicons name='ios-chatbubbles' {...iconProps} />
           <Ionicons name='ios-globe' {...iconProps} />
-          <TourGuideZone zone={5} tooltipLeftOffset={50}>
+          <TourGuideZone zone={5}>
             <Ionicons name='ios-navigate' {...iconProps} />
           </TourGuideZone>
-          <TourGuideZone
-            zone={2}
-            shape={'circle'}
-            tooltipLeftOffset={100}
-            maskOffset={{ top: 20, bottom: 15, left: 10, right: 25 }}
-          >
+          <TourGuideZone zone={6} shape={'circle'}>
             <Ionicons name='ios-rainy' {...iconProps} />
+          </TourGuideZone>
+          <TourGuideZone
+            tourKey='advanced'
+            zone={8}
+            shape={'rectangle'}
+            text={
+              'Advanced Tour: Enhanced Mask Offset with directional spacing: top=30, bottom=20, left=15, right=40'
+            }
+            maskOffset={{ top: 30, bottom: 20, left: 15, right: 40 }}
+          >
+            <Ionicons name='ios-star' {...iconProps} />
+          </TourGuideZone>
+          <TourGuideZone
+            tourKey='advanced'
+            zone={9}
+            shape={'rectangle'}
+            text={
+              'Advanced Tour: Tooltip Left Offset positioned 400px from the left edge of the screen'
+            }
+            tooltipLeftOffset={400}
+          >
+            <Ionicons name='ios-heart' {...iconProps} />
           </TourGuideZone>
         </View>
         <View

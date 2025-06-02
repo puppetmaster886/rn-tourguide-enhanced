@@ -38,6 +38,7 @@ export interface ModalProps {
   next: () => void
   prev: () => void
   preventOutsideInteraction?: boolean
+  persistTooltip?: boolean
 }
 
 interface Layout {
@@ -204,7 +205,7 @@ export class Modal extends React.Component<ModalProps, State> {
       toValue,
       duration,
       easing: this.props.easing,
-      delay: duration,
+      delay: this.props.persistTooltip ? 0 : duration,
       useNativeDriver: true,
     })
     const opacityAnim = Animated.timing(this.state.opacity, {
@@ -214,22 +215,31 @@ export class Modal extends React.Component<ModalProps, State> {
       delay: duration,
       useNativeDriver: true,
     })
-    this.state.opacity.setValue(0)
-    // Set the tooltip content when the opacity is 0
-    this.setState({
-      isFirstStep: this.props.isFirstStep,
-      isLastStep: this.props.isLastStep,
-      currentStep: this.props.currentStep,
-    })
+
+    const animations = []
     if (
       // @ts-ignore
       toValue !== this.state.tooltipTranslateY._value &&
       !this.props.currentStep?.keepTooltipPosition
     ) {
-      Animated.parallel([translateAnim, opacityAnim]).start()
-    } else {
-      opacityAnim.start()
+      animations.push(translateAnim)
     }
+    if (!this.props.persistTooltip) {
+      this.state.opacity.setValue(0)
+      // Set the tooltip content when the opacity is 0
+      this.setState({
+        isFirstStep: this.props.isFirstStep,
+        isLastStep: this.props.isLastStep,
+        currentStep: this.props.currentStep,
+      })
+      animations.push(opacityAnim)
+    } else if (
+      // @ts-ignore
+      this.state.opacity._value !== 1
+    ) {
+      animations.push(opacityAnim)
+    }
+    Animated.parallel(animations).start()
 
     this.setState({
       tooltip,

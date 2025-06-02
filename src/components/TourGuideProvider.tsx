@@ -38,6 +38,7 @@ export interface TourGuideProviderProps {
   children: React.ReactNode
   dismissOnPress?: boolean
   preventOutsideInteraction?: boolean
+  persistTooltip?: boolean
 }
 
 export const TourGuideProvider = ({
@@ -55,6 +56,7 @@ export const TourGuideProvider = ({
   startAtMount = false,
   dismissOnPress = false,
   preventOutsideInteraction = false,
+  persistTooltip = false,
 }: TourGuideProviderProps) => {
   const [scrollRef, setScrollRef] = useState<React.RefObject<any>>()
   const [tourKey, setTourKey] = useState<string | '_default'>('_default')
@@ -328,6 +330,7 @@ export const TourGuideProvider = ({
             borderRadius,
             dismissOnPress,
             preventOutsideInteraction,
+            persistTooltip,
           }}
         />
       </TourGuideContext.Provider>

@@ -10,7 +10,13 @@ import {
   View,
   ViewStyle,
 } from 'react-native'
-import { BorderRadiusObject, IStep, Labels, ValueXY } from '../types'
+import {
+  BorderRadiusObject,
+  IStep,
+  Labels,
+  MaskOffset,
+  ValueXY,
+} from '../types'
 import styles, { MARGIN } from './style'
 import { SvgMask } from './SvgMask'
 import { Tooltip, TooltipProps } from './Tooltip'
@@ -26,7 +32,7 @@ export interface ModalProps {
   animationDuration?: number
   tooltipComponent: React.ComponentType<TooltipProps>
   tooltipStyle?: StyleProp<ViewStyle>
-  maskOffset?: number
+  maskOffset?: MaskOffset
   borderRadius?: number
   borderRadiusObject?: BorderRadiusObject
   androidStatusBarVisible: boolean
@@ -182,15 +188,27 @@ export class Modal extends React.Component<ModalProps, State> {
       tooltip.bottom = layout.height! - (obj.top - MARGIN)
     }
 
-    if (horizontalPosition === 'left') {
-      tooltip.right = Math.max(layout.width! - (obj.left + obj.width), 0)
-      tooltip.right =
-        tooltip.right === 0 ? tooltip.right + MARGIN : tooltip.right
-      tooltip.maxWidth = layout.width! - tooltip.right - MARGIN
-    } else {
-      tooltip.left = Math.max(obj.left, 0)
-      tooltip.left = tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
+    // Apply custom tooltipLeftOffset if provided
+    const customLeftOffset = this.props.currentStep?.tooltipLeftOffset
+
+    if (customLeftOffset !== undefined) {
+      // When tooltipLeftOffset is provided, use it directly
+      tooltip.left = customLeftOffset
       tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
+      // Clear right positioning when using custom left
+      tooltip.right = 0
+    } else {
+      // Original logic when no custom left offset is provided
+      if (horizontalPosition === 'left') {
+        tooltip.right = Math.max(layout.width! - (obj.left + obj.width), 0)
+        tooltip.right =
+          tooltip.right === 0 ? tooltip.right + MARGIN : tooltip.right
+        tooltip.maxWidth = layout.width! - tooltip.right - MARGIN
+      } else {
+        tooltip.left = Math.max(obj.left, 0)
+        tooltip.left = tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
+        tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
+      }
     }
 
     const duration = this.props.animationDuration! + 200

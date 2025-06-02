@@ -95,7 +95,7 @@ export const TourGuideProvider = ({
 
   useEffect(() => {
     if (visible || (windowIsResized && currentStep) || currentStep) {
-      moveToCurrentStep()
+      moveToCurrentStep(tourKey)
       setWindowResized(false)
     }
   }, [visible, currentStep, windowIsResized])

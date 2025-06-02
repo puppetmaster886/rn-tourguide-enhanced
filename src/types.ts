@@ -12,10 +12,11 @@ export interface IStep {
   text: string
   wrapper: any
   shape?: Shape
-  maskOffset?: number
+  maskOffset?: MaskOffset
   borderRadius?: number
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
+  tooltipLeftOffset?: number
   borderRadiusObject?: BorderRadiusObject
 }
 export interface StepObject {
@@ -48,7 +49,7 @@ export interface SVGMaskPathMorphParam {
     position: ValueXY
     size: ValueXY
     shape?: Shape
-    maskOffset?: number
+    maskOffset?: MaskOffset
     borderRadius?: number
     borderRadiusObject?: BorderRadiusObject
   }
@@ -63,3 +64,12 @@ export interface Labels {
   next?: string
   finish?: string
 }
+
+export interface MaskOffsetObject {
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type MaskOffset = number | MaskOffsetObject

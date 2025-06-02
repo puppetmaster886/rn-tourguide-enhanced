@@ -382,6 +382,98 @@ Sometimes you need to prevent users to interact with app while tour is shown, in
 </TourGuideProvider>
 ```
 
+## 🆕 New Features
+
+### ScrollView Support
+
+The tour guide now works seamlessly inside ScrollViews. Pass a scroll reference to automatically scroll to tour steps:
+
+```tsx
+const AppContent = () => {
+  const scrollRef = React.useRef(null)
+  const { start, canStart } = useTourGuideController()
+
+  React.useEffect(() => {
+    if (canStart) {
+      start(1, scrollRef) // Pass scrollRef as second parameter
+    }
+  }, [canStart])
+
+  return (
+    <ScrollView ref={scrollRef}>
+      <TourGuideZone zone={1} text='This step will auto-scroll into view'>
+        <Text>Content</Text>
+      </TourGuideZone>
+    </ScrollView>
+  )
+}
+```
+
+### Persistent Tooltips
+
+Keep tooltips visible during step transitions for a smoother user experience:
+
+```tsx
+<TourGuideProvider persistTooltip={true}>
+  <AppContent />
+</TourGuideProvider>
+```
+
+### Custom Tooltip Positioning
+
+#### Bottom Offset
+
+Control the vertical position of tooltips:
+
+```tsx
+<TourGuideZone zone={1} tooltipBottomOffset={100}>
+  <Button title='Custom bottom spacing' />
+</TourGuideZone>
+```
+
+#### Left Offset
+
+Control the horizontal position of tooltips:
+
+```tsx
+<TourGuideZone zone={1} tooltipLeftOffset={50}>
+  <Button title='Custom left positioning' />
+</TourGuideZone>
+```
+
+### Enhanced Mask Offset
+
+Define different mask offsets for each direction for precise highlighting:
+
+```tsx
+// Traditional single offset (still supported)
+<TourGuideZone zone={1} maskOffset={10}>
+  <Button title="Equal offset" />
+</TourGuideZone>
+
+// Enhanced directional offsets
+<TourGuideZone
+  zone={2}
+  maskOffset={{ top: 20, bottom: 15, left: 10, right: 25 }}
+>
+  <Button title="Custom directional offsets" />
+</TourGuideZone>
+
+// Partial directional offsets (missing values default to 0)
+<TourGuideZone
+  zone={3}
+  maskOffset={{ top: 10, left: 5 }}
+>
+  <Button title="Partial offsets" />
+</TourGuideZone>
+```
+
+### Cross-Platform Improvements
+
+- **Web & Mobile**: Fixed SVG mask issues on screen resize
+- **Landscape Mode**: Improved modal positioning in landscape orientation
+- **Android**: Better StatusBar handling with `androidStatusBarVisible` prop
+
 ## Contributing
 
 Issues and Pull Requests are always welcome.

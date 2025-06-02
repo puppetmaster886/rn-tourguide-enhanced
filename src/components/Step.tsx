@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { BorderRadiusObject, Shape } from '../types'
+import { BorderRadiusObject, MaskOffset, Shape } from '../types'
 import { ConnectedStep } from './ConnectedStep'
 import { TourGuideContext } from './TourGuideContext'
 
@@ -10,7 +10,7 @@ interface Props {
   tourKey: string
   shape?: Shape
   active?: boolean
-  maskOffset?: number
+  maskOffset?: MaskOffset
   borderRadius?: number
   children: React.ReactNode
   keepTooltipPosition?: boolean

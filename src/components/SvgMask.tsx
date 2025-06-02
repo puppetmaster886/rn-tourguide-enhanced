@@ -11,8 +11,8 @@ import {
   ViewStyle,
 } from 'react-native'
 import Svg, { PathProps } from 'react-native-svg'
-import { IStep, ValueXY } from '../types'
-import { svgMaskPathMorph, IS_NATIVE } from '../utilities'
+import { IStep, MaskOffset, ValueXY } from '../types'
+import { IS_NATIVE, svgMaskPathMorph } from '../utilities'
 import { AnimatedSvgPath } from './AnimatedPath'
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
   animationDuration?: number
   backdropColor: string
   dismissOnPress?: boolean
-  maskOffset?: number
+  maskOffset?: MaskOffset
   borderRadius?: number
   currentStep?: IStep
   easing: (value: number) => number
@@ -76,7 +76,7 @@ export class SvgMask extends Component<Props, State> {
 
     this.state = {
       canvasSize: {
-        x: this.windowDimensions.width+50,
+        x: this.windowDimensions.width + 50,
         y: this.windowDimensions.height,
       },
       size: props.size,

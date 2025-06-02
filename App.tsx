@@ -22,7 +22,14 @@ const uri =
 // Add <TourGuideProvider/> at the root of you app!
 function App() {
   return (
-    <TourGuideProvider {...{ borderRadius: 16, androidStatusBarVisible: true }} preventOutsideInteraction>
+    <TourGuideProvider
+      {...{
+        borderRadius: 16,
+        androidStatusBarVisible: true,
+        persistTooltip: true,
+      }}
+      preventOutsideInteraction
+    >
       <AppContent />
     </TourGuideProvider>
   )
@@ -30,14 +37,14 @@ function App() {
 
 const AppContent = () => {
   const iconProps = { size: 40, color: '#888' }
-  const scrollRef = React.useRef(null);
+  const scrollRef = React.useRef(null)
   // Use Hooks to control!
   const { start, canStart, stop, eventEmitter } = useTourGuideController()
 
   React.useEffect(() => {
     // start at mount
     if (canStart) {
-      start(1,scrollRef)
+      start(1, scrollRef)
     }
   }, [canStart]) // wait until everything is registered
 
@@ -49,138 +56,175 @@ const AppContent = () => {
   }, [])
   return (
     <ScrollView
-        ref={(r)=> {scrollRef.current = r}}
-        contentContainerStyle={{ flexGrow: 1 }}
-        scrollEventThrottle={16}
-        keyboardShouldPersistTaps={'always'}
-      >
-    <View style={styles.container}>
-      {/* Use TourGuideZone only to wrap */}
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <Text style={styles.title}>
-          {'Welcome to the demo of\n"rn-tourguide"'}
-        </Text>
-      <TourGuideZone
-        keepTooltipPosition
-        zone={6}
-        text={'A react-native-copilot remastered! 🎉'}
-        borderRadius={16}
-      >
+      ref={(r) => {
+        scrollRef.current = r
+      }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      scrollEventThrottle={16}
+      keyboardShouldPersistTaps={'always'}
+    >
+      <View style={styles.container}>
+        {/* Use TourGuideZone only to wrap */}
         <Text style={styles.title}>
           {'Welcome to the demo of\n"rn-tourguide"'}
         </Text>
-      </TourGuideZone>
-      <View style={styles.middleView}>
-        <TouchableOpacity style={styles.button} onPress={() => start()}>
-          <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
-        </TouchableOpacity>
-
-        <TourGuideZone zone={3} shape={'rectangle_and_keep'}>
-          <TouchableOpacity style={styles.button} onPress={() => start(4)}>
-            <Text style={styles.buttonText}>Step 4</Text>
-          </TouchableOpacity>
-        </TourGuideZone>
-        <TouchableOpacity style={styles.button} onPress={() => start(2)}>
-          <Text style={styles.buttonText}>Step 2</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={stop}>
-          <Text style={styles.buttonText}>Stop</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
+        <Text style={styles.title}>
+          {'Welcome to the demo of\n"rn-tourguide"'}
+        </Text>
         <TourGuideZone
-          zone={7}
-          shape='circle'
-          text={'With animated SVG morphing with awesome flubber 🍮💯'}
+          keepTooltipPosition
+          zone={6}
+          text={'A react-native-copilot remastered! 🎉'}
+          borderRadius={16}
         >
-          <Image source={{ uri }} style={styles.profilePhoto} />
+          <Text style={styles.title}>
+            {'Welcome to the demo of\n"rn-tourguide"'}
+          </Text>
         </TourGuideZone>
-      </View>
-      <View style={styles.row}>
-        <TourGuideZone zone={4} shape={'circle'} tooltipBottomOffset={200}>
-          <Ionicons name='ios-add-circle' {...iconProps} />
-        </TourGuideZone>
-        <Ionicons name='ios-chatbubbles' {...iconProps} />
-        <Ionicons name='ios-globe' {...iconProps} />
-        <TourGuideZone zone={5}>
-          <Ionicons name='ios-navigate' {...iconProps} />
-        </TourGuideZone>
-        <TourGuideZone zone={2} shape={'circle'}>
-          <Ionicons name='ios-rainy' {...iconProps} />
-        </TourGuideZone>
-      </View>
-      <View
-        style={[
-          StyleSheet.absoluteFillObject,
-          {
-            top: 250,
-            left: 50,
-            width: 64,
-            height: 64,
-            backgroundColor: 'red',
-          },
-        ]}
-      />
-      {Platform.OS !== 'web' ? (
-        <TourGuideZoneByPosition
-          zone={1}
-          shape={'circle'}
-          isTourGuide
-          top={250}
-          left={50}
-          width={64}
-          height={64}
+        <View style={styles.middleView}>
+          <TouchableOpacity style={styles.button} onPress={() => start()}>
+            <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
+          </TouchableOpacity>
+
+          <TourGuideZone zone={3} shape={'rectangle_and_keep'}>
+            <TouchableOpacity style={styles.button} onPress={() => start(4)}>
+              <Text style={styles.buttonText}>Step 4</Text>
+            </TouchableOpacity>
+          </TourGuideZone>
+          <TouchableOpacity style={styles.button} onPress={() => start(2)}>
+            <Text style={styles.buttonText}>Step 2</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={stop}>
+            <Text style={styles.buttonText}>Stop</Text>
+          </TouchableOpacity>
+          <TourGuideZone
+            zone={7}
+            shape='circle'
+            text={'With animated SVG morphing with awesome flubber 🍮💯'}
+          >
+            <Image source={{ uri }} style={styles.profilePhoto} />
+          </TourGuideZone>
+        </View>
+        <View style={styles.row}>
+          <TourGuideZone zone={4} shape={'circle'} tooltipBottomOffset={200}>
+            <Ionicons name='ios-add-circle' {...iconProps} />
+          </TourGuideZone>
+          <Ionicons name='ios-chatbubbles' {...iconProps} />
+          <Ionicons name='ios-globe' {...iconProps} />
+          <TourGuideZone zone={5} tooltipLeftOffset={50}>
+            <Ionicons name='ios-navigate' {...iconProps} />
+          </TourGuideZone>
+          <TourGuideZone
+            zone={2}
+            shape={'circle'}
+            tooltipLeftOffset={100}
+            maskOffset={{ top: 20, bottom: 15, left: 10, right: 25 }}
+          >
+            <Ionicons name='ios-rainy' {...iconProps} />
+          </TourGuideZone>
+        </View>
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              top: 250,
+              left: 50,
+              width: 64,
+              height: 64,
+              backgroundColor: 'red',
+            },
+          ]}
         />
-      ) : null}
-    </View>
+        {Platform.OS !== 'web' ? (
+          <TourGuideZoneByPosition
+            zone={1}
+            shape={'circle'}
+            isTourGuide
+            top={250}
+            left={50}
+            width={64}
+            height={64}
+          />
+        ) : null}
+      </View>
     </ScrollView>
   )
 }

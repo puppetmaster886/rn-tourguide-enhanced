@@ -1,11 +1,12 @@
 // @ts-ignore
 import { interpolate, separate, splitPathString, toCircle } from 'flubber'
-import { Platform } from 'react-native'
 import clamp from 'lodash.clamp'
 import memoize from 'memoize-one'
+import { Platform } from 'react-native'
 import {
   BorderRadiusObject,
   IStep,
+  MaskOffset,
   Shape,
   Steps,
   SVGMaskPathMorphParam,
@@ -234,12 +235,159 @@ const getInterpolator = memoize(
   },
 )
 
+// Enhanced maskOffset functions for PR #61
+const normalizeMarkOffset = (maskOffset?: MaskOffset) => {
+  if (typeof maskOffset === 'number') {
+    return {
+      top: maskOffset,
+      bottom: maskOffset,
+      left: maskOffset,
+      right: maskOffset,
+    }
+  }
+  if (maskOffset && typeof maskOffset === 'object') {
+    return {
+      top: maskOffset.top || 0,
+      bottom: maskOffset.bottom || 0,
+      left: maskOffset.left || 0,
+      right: maskOffset.right || 0,
+    }
+  }
+  return {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  }
+}
+
+const sizeOffsetEnhanced = memoize((size: ValueXY, maskOffset?: MaskOffset) => {
+  if (!maskOffset) return size
+
+  const normalized = normalizeMarkOffset(maskOffset)
+  return {
+    x: size.x + normalized.left + normalized.right,
+    y: size.y + normalized.top + normalized.bottom,
+  }
+})
+
+const positionOffsetEnhanced = memoize(
+  (position: ValueXY, maskOffset?: MaskOffset) => {
+    if (!maskOffset) return position
+
+    const normalized = normalizeMarkOffset(maskOffset)
+    return {
+      x: position.x - normalized.left,
+      y: position.y - normalized.top,
+    }
+  },
+)
+
+const getInterpolatorEnhanced = memoize(
+  (
+    previousPath: string,
+    shape: Shape,
+    position: ValueXY,
+    size: ValueXY,
+    maskOffset?: MaskOffset,
+    borderRadius: number = 0,
+    borderRadiusObject?: BorderRadiusObject,
+  ) => {
+    const options = {
+      maxSegmentLength: getMaxSegmentLength(shape),
+    }
+    const optionsKeep = { single: true }
+
+    // Handle enhanced maskOffset for circles
+    const getCircleRadius = () => {
+      if (!maskOffset) {
+        return Math.max(size.x, size.y) / 2
+      }
+
+      if (typeof maskOffset === 'number') {
+        return Math.max(size.x, size.y) / 2 + maskOffset
+      }
+
+      const normalized = normalizeMarkOffset(maskOffset)
+      const avgOffset =
+        (normalized.top +
+          normalized.bottom +
+          normalized.left +
+          normalized.right) /
+        4
+      return Math.max(size.x, size.y) / 2 + avgOffset
+    }
+
+    const getDefaultInterpolate = () =>
+      interpolate(
+        previousPath,
+        defaultSvgPath({
+          size: sizeOffsetEnhanced(size, maskOffset),
+          position: positionOffsetEnhanced(position, maskOffset),
+          borderRadius,
+          borderRadiusObject,
+        }),
+        options,
+      )
+
+    const getCircleInterpolator = () =>
+      toCircle(
+        previousPath,
+        position.x + size.x / 2,
+        position.y + size.y / 2,
+        getCircleRadius(),
+        options,
+      )
+
+    switch (shape) {
+      case 'circle':
+        return getCircleInterpolator()
+      case 'rectangle':
+        return getDefaultInterpolate()
+      case 'circle_and_keep': {
+        const path = getSplitPathSliceOne(previousPath)
+        return separate(
+          previousPath,
+          [
+            path,
+            circleSvgPath({
+              size: sizeOffsetEnhanced(size, maskOffset),
+              position,
+            }),
+          ],
+          optionsKeep,
+        )
+      }
+
+      case 'rectangle_and_keep': {
+        const path = getSplitPathSliceOne(previousPath)
+        return separate(
+          previousPath,
+          [
+            path,
+            defaultSvgPath({
+              size: sizeOffsetEnhanced(size, maskOffset),
+              position: positionOffsetEnhanced(position, maskOffset),
+              borderRadius,
+              borderRadiusObject,
+            }),
+          ],
+          optionsKeep,
+        )
+      }
+      default:
+        return getDefaultInterpolate()
+    }
+  },
+)
+
 export const svgMaskPathMorph = ({
   previousPath,
   animation,
   to: { position, size, shape, maskOffset, borderRadius, borderRadiusObject },
 }: SVGMaskPathMorphParam) => {
-  const interpolator = getInterpolator(
+  // Use enhanced interpolator that supports both number and object maskOffset
+  const interpolator = getInterpolatorEnhanced(
     cleanPath(previousPath),
     shape!,
     position,

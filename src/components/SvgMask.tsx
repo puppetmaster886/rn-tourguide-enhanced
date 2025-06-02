@@ -76,7 +76,7 @@ export class SvgMask extends Component<Props, State> {
 
     this.state = {
       canvasSize: {
-        x: this.windowDimensions.width,
+        x: this.windowDimensions.width+50,
         y: this.windowDimensions.height,
       },
       size: props.size,

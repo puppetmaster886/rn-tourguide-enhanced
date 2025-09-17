@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native'
 import { useIsMounted } from '../hooks/useIsMounted'
-import { IStep, Labels, StepObject, Steps } from '../types'
+import { IStep, Labels, LeaderLineConfig, StepObject, Steps } from '../types'
 import * as utils from '../utilities'
 import { Modal } from './Modal'
 import { OFFSET_WIDTH } from './style'
@@ -39,6 +39,7 @@ export interface TourGuideProviderProps {
   dismissOnPress?: boolean
   preventOutsideInteraction?: boolean
   persistTooltip?: boolean
+  leaderLineConfig?: LeaderLineConfig
 }
 
 export const TourGuideProvider = ({
@@ -57,6 +58,7 @@ export const TourGuideProvider = ({
   dismissOnPress = false,
   preventOutsideInteraction = false,
   persistTooltip = false,
+  leaderLineConfig,
 }: TourGuideProviderProps) => {
   const [scrollRef, setScrollRef] = useState<React.RefObject<any>>()
   const [tourKey, setTourKey] = useState<string | '_default'>('_default')
@@ -77,6 +79,52 @@ export const TourGuideProvider = ({
   const [canStart, setCanStart] = useState<Ctx<boolean>>({ _default: false })
 
   const [windowIsResized, setWindowResized] = useState(false)
+
+  // Add state to track the highlighted element ref for LeaderLine
+  const [highlightedElementRef, setHighlightedElementRef] = useState<
+    Ctx<React.RefObject<View> | undefined>
+  >({ _default: undefined })
+
+  // Function to register highlighted element ref
+  const registerHighlightedElementRef = (
+    key: string,
+    ref: React.RefObject<View>,
+  ) => {
+    console.log('🏹 TourGuideProvider: registerHighlightedElementRef llamado')
+    console.log('🏹 TourGuideProvider: key:', key)
+    console.log('🏹 TourGuideProvider: ref:', !!ref)
+    console.log('🏹 TourGuideProvider: ref.current:', !!ref?.current)
+
+    setHighlightedElementRef((prev) => {
+      const newRefs = {
+        ...prev,
+        [key]: ref,
+      }
+      console.log(
+        '🏹 TourGuideProvider: highlightedElementRef actualizado:',
+        Object.keys(newRefs),
+      )
+      return newRefs
+    })
+  }
+
+  // Function to unregister highlighted element ref
+  const unregisterHighlightedElementRef = (key: string) => {
+    console.log(
+      '🏹 TourGuideProvider: unregisterHighlightedElementRef llamado para key:',
+      key,
+    )
+
+    setHighlightedElementRef((prev) => {
+      const newRefs = { ...prev }
+      delete newRefs[key]
+      console.log(
+        '🏹 TourGuideProvider: highlightedElementRef después de unregister:',
+        Object.keys(newRefs),
+      )
+      return newRefs
+    })
+  }
 
   const startTries = useRef<number>(0)
   const { current: mounted } = useIsMounted()
@@ -148,7 +196,13 @@ export const TourGuideProvider = ({
   }, [mounted, steps])
 
   const moveToCurrentStep = async (key: string) => {
+    console.log(
+      '🎯 TourGuideProvider: moveToCurrentStep() llamado con key:',
+      key,
+    )
     const size = await currentStep[key]?.target.measure()
+    console.log('🎯 TourGuideProvider: size medido:', size)
+
     if (
       size === undefined ||
       isNaN(size.width) ||
@@ -156,27 +210,63 @@ export const TourGuideProvider = ({
       isNaN(size.x) ||
       isNaN(size.y)
     ) {
+      console.log('🎯 TourGuideProvider: size inválido, retornando')
       return
     }
-    await modal.current?.animateMove({
+
+    const moveParams = {
       width: size.width + OFFSET_WIDTH,
       height: size.height + OFFSET_WIDTH,
       left: Math.round(size.x) - OFFSET_WIDTH / 2,
       top: Math.round(size.y) - OFFSET_WIDTH / 2 + (verticalOffset || 0),
-    })
+    }
+
+    console.log('🎯 TourGuideProvider: llamando animateMove con:', moveParams)
+
+    // COORDINACIÓN MEJORADA: Ejecutar animaciones secuencialmente
+    // Esto evita conflictos entre SvgMask y Modal animaciones
+    try {
+      await modal.current?.animateMove(moveParams)
+      console.log('🎯 TourGuideProvider: animateMove completado')
+
+      // Pequeño delay para asegurar que las animaciones se estabilicen
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Forzar un re-render final para asegurar visibilidad
+      if (modal.current) {
+        setTimeout(() => {
+          console.log(
+            '🎯 TourGuideProvider: Forzando re-render final del Modal',
+          )
+          modal.current.forceUpdate()
+        }, 50)
+      }
+    } catch (error) {
+      console.error('🎯 TourGuideProvider: Error en animateMove:', error)
+    }
   }
 
   const setCurrentStep = async (key: string, step?: IStep) =>
     new Promise<void>(async (resolve) => {
+      console.log('📝 TourGuideProvider: setCurrentStep() llamado')
+      console.log('📝 TourGuideProvider: key:', key)
+      console.log('📝 TourGuideProvider: step:', step?.name || 'no-step')
+      console.log('📝 TourGuideProvider: scrollRef:', !!scrollRef)
+
       if (scrollRef && step) {
+        console.log('📝 TourGuideProvider: midiendo layout para scroll')
         await step.wrapper.measureLayout(
           findNodeHandle(scrollRef.current),
           (_x: number, y: number, _w: number, h: number) => {
             const yOffsett = y > 0 ? y - h / 2 : 0
+            console.log('📝 TourGuideProvider: haciendo scroll a:', yOffsett)
             scrollRef.current.scrollTo({ y: yOffsett, animated: false })
           },
         )
         setTimeout(() => {
+          console.log(
+            '📝 TourGuideProvider: actualizando currentStep después del scroll',
+          )
           updateCurrentStep((currentStep) => {
             const newStep = { ...currentStep }
             newStep[key] = step
@@ -186,6 +276,7 @@ export const TourGuideProvider = ({
           resolve()
         }, 100)
       } else {
+        console.log('📝 TourGuideProvider: actualizando currentStep sin scroll')
         updateCurrentStep((currentStep) => {
           const newStep = { ...currentStep }
           newStep[key] = step
@@ -305,6 +396,8 @@ export const TourGuideProvider = ({
           stop,
           canStart,
           setTourKey,
+          registerHighlightedElementRef,
+          unregisterHighlightedElementRef,
         }}
       >
         {children}
@@ -329,8 +422,37 @@ export const TourGuideProvider = ({
             dismissOnPress,
             preventOutsideInteraction,
             persistTooltip,
+            leaderLineConfig,
+            // Pass the highlightedElementRef to the Modal
+            highlightedElementRef: highlightedElementRef[tourKey],
           }}
         />
+        {/* DEBUG: Logging de highlightedElementRef para LeaderLine */}
+        {(() => {
+          const currentRef = highlightedElementRef[tourKey]
+          console.log(
+            '🏹 TourGuideProvider: Pasando highlightedElementRef al Modal',
+          )
+          console.log('🏹 TourGuideProvider: tourKey:', tourKey)
+          console.log(
+            '🏹 TourGuideProvider: highlightedElementRef existe:',
+            !!currentRef,
+          )
+          console.log(
+            '🏹 TourGuideProvider: highlightedElementRef.current existe:',
+            !!currentRef?.current,
+          )
+          if (currentRef?.current) {
+            console.log(
+              '🏹 TourGuideProvider: ✅ Elemento ref disponible para LeaderLine',
+            )
+          } else {
+            console.log(
+              '🏹 TourGuideProvider: ❌ Elemento ref NO disponible para LeaderLine',
+            )
+          }
+          return null
+        })()}
       </TourGuideContext.Provider>
     </View>
   )

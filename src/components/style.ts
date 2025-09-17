@@ -1,6 +1,9 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native'
+import { StyleSheet, TextStyle, ViewStyle } from 'react-native'
 
 export const Z_INDEX: number = 100
+export const BACKDROP_Z_INDEX: number = 9999 // SVG Backdrop
+export const LEADER_LINE_Z_INDEX: number = 10000 // LeaderLine SVG
+export const TOOLTIP_Z_INDEX: number = 10001 // Tooltip por encima de todo
 export const MARGIN: number = 13
 export const OFFSET_WIDTH: number = 4
 
@@ -35,7 +38,8 @@ export default StyleSheet.create<IStyle>({
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 16,
-    zIndex: Z_INDEX - 1,
+    zIndex: TOOLTIP_Z_INDEX, // Usar la constante definida
+    elevation: TOOLTIP_Z_INDEX, // Para Android
   },
   nonInteractionPlaceholder: {
     backgroundColor: 'transparent',
@@ -67,5 +71,7 @@ export default StyleSheet.create<IStyle>({
     top: 0,
     bottom: 0,
     right: 0,
+    zIndex: Z_INDEX + 1, // Asegurar que esté encima de otros elementos
+    backgroundColor: 'transparent',
   },
 })

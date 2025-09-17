@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { View } from 'react-native'
 import { IStep } from '../types'
 
 export type Handler = (event?: any) => void
@@ -18,6 +19,8 @@ export interface ITourGuideContext {
   getCurrentStep?(key: string): IStep | undefined
   start?(key: string, fromStep?: number, scrollRef?: React.RefObject<any>): void
   stop?(key: string): void
+  registerHighlightedElementRef?(key: string, ref: React.RefObject<View>): void
+  unregisterHighlightedElementRef?(key: string): void
 }
 
 export const TourGuideContext = React.createContext<ITourGuideContext>({

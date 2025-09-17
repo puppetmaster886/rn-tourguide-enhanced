@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import SimpleLeaderLineTest from './SimpleLeaderLineTest'
 import {
   TourGuideProvider,
   TourGuideZone,
@@ -27,6 +28,14 @@ function App() {
         borderRadius: 16,
         androidStatusBarVisible: true,
         persistTooltip: true,
+        // Basic LeaderLine configuration
+        leaderLineConfig: {
+          enabled: true,
+          color: '#2980b9',
+          size: 3,
+          startPlug: 'disc',
+          endPlug: 'arrow1',
+        },
       }}
       preventOutsideInteraction
     >
@@ -38,6 +47,7 @@ function App() {
 const AppContent = () => {
   const iconProps = { size: 40, color: '#888' }
   const scrollRef = React.useRef<ScrollView>(null)
+  const [showSimpleTest, setShowSimpleTest] = React.useState(false)
 
   // Main tour controller
   const { start, canStart, stop, eventEmitter } = useTourGuideController()
@@ -92,6 +102,12 @@ const AppContent = () => {
       }
     }
   }, [eventEmitterAdvanced])
+
+  // If showing simple test, render it instead
+  if (showSimpleTest) {
+    return <SimpleLeaderLineTest onGoBack={() => setShowSimpleTest(false)} />
+  }
+
   return (
     <ScrollView
       ref={scrollRef}
@@ -106,6 +122,13 @@ const AppContent = () => {
           zone={2}
           text={'A react-native-copilot remastered! 🎉'}
           borderRadius={16}
+          leaderLineConfig={{
+            enabled: true,
+            color: '#e74c3c',
+            size: 4,
+            startPlug: 'disc',
+            endPlug: 'arrow2',
+          }}
         >
           <Text style={styles.title}>
             {'Welcome to the demo of\n"rn-tourguide"'}
@@ -116,7 +139,25 @@ const AppContent = () => {
             <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
           </TouchableOpacity>
 
-          <TourGuideZone zone={3} shape={'rectangle_and_keep'}>
+          {/* Simple LeaderLine Test Button */}
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#e74c3c' }]}
+            onPress={() => setShowSimpleTest(true)}
+          >
+            <Text style={styles.buttonText}>TEST SIMPLE LEADERLINE</Text>
+          </TouchableOpacity>
+
+          <TourGuideZone
+            zone={3}
+            shape={'rectangle_and_keep'}
+            leaderLineConfig={{
+              enabled: true,
+              color: '#f39c12',
+              size: 5,
+              startPlug: 'square',
+              endPlug: 'arrow3',
+            }}
+          >
             <TouchableOpacity style={styles.button} onPress={() => start(4)}>
               <Text style={styles.buttonText}>Step 4</Text>
             </TouchableOpacity>
@@ -183,10 +224,25 @@ const AppContent = () => {
           </TourGuideZone>
           <Ionicons name='ios-chatbubbles' {...iconProps} />
           <Ionicons name='ios-globe' {...iconProps} />
-          <TourGuideZone zone={5}>
+          <TourGuideZone
+            zone={5}
+            leaderLineConfig={{
+              enabled: true,
+              color: '#27ae60',
+              size: 2,
+              startPlug: 'disc',
+              endPlug: 'hand',
+            }}
+          >
             <Ionicons name='ios-navigate' {...iconProps} />
           </TourGuideZone>
-          <TourGuideZone zone={6} shape={'circle'}>
+          <TourGuideZone
+            zone={6}
+            shape={'circle'}
+            leaderLineConfig={{
+              enabled: false, // Disable LeaderLine for this step
+            }}
+          >
             <Ionicons name='ios-rainy' {...iconProps} />
           </TourGuideZone>
           <TourGuideZone

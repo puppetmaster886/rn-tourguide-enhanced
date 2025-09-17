@@ -126,24 +126,6 @@ export const circleSvgPath = ({
   ].join('')
 }
 
-const sizeOffset = memoize((size: ValueXY, maskOffset: number = 0) =>
-  maskOffset
-    ? {
-        x: size.x + maskOffset,
-        y: size.y + maskOffset,
-      }
-    : size,
-)
-
-const positionOffset = memoize((position: ValueXY, maskOffset: number = 0) =>
-  maskOffset
-    ? {
-        x: position.x - maskOffset / 2,
-        y: position.y - maskOffset / 2,
-      }
-    : position,
-)
-
 const getMaxSegmentLength = memoize((shape: Shape) => {
   switch (shape) {
     case 'circle':
@@ -161,79 +143,6 @@ const getSplitPathSliceOne = memoize((path: SvgPath) => {
   const splitPath = splitPathString(path)
   return splitPath.length > 1 ? splitPath.slice(1).join('') : path
 })
-
-const getInterpolator = memoize(
-  (
-    previousPath: string,
-    shape: Shape,
-    position: ValueXY,
-    size: ValueXY,
-    maskOffset: number = 0,
-    borderRadius: number = 0,
-    borderRadiusObject?: BorderRadiusObject,
-  ) => {
-    const options = {
-      maxSegmentLength: getMaxSegmentLength(shape),
-    }
-    const optionsKeep = { single: true }
-    const getDefaultInterpolate = () =>
-      interpolate(
-        previousPath,
-        defaultSvgPath({
-          size: sizeOffset(size, maskOffset),
-          position: positionOffset(position, maskOffset),
-          borderRadius,
-          borderRadiusObject,
-        }),
-        options,
-      )
-    const getCircleInterpolator = () =>
-      toCircle(
-        previousPath,
-        position.x + size.x / 2,
-        position.y + size.y / 2,
-        Math.max(size.x, size.y) / 2 + maskOffset,
-        options,
-      )
-
-    switch (shape) {
-      case 'circle':
-        return getCircleInterpolator()
-      case 'rectangle':
-        return getDefaultInterpolate()
-      case 'circle_and_keep': {
-        const path = getSplitPathSliceOne(previousPath)
-        return separate(
-          previousPath,
-          [
-            path,
-            circleSvgPath({ size: sizeOffset(size, maskOffset), position }),
-          ],
-          optionsKeep,
-        )
-      }
-
-      case 'rectangle_and_keep': {
-        const path = getSplitPathSliceOne(previousPath)
-        return separate(
-          previousPath,
-          [
-            path,
-            defaultSvgPath({
-              size: sizeOffset(size, maskOffset),
-              position: positionOffset(position, maskOffset),
-              borderRadius,
-              borderRadiusObject,
-            }),
-          ],
-          optionsKeep,
-        )
-      }
-      default:
-        return getDefaultInterpolate()
-    }
-  },
-)
 
 // Enhanced maskOffset functions for PR #61
 const normalizeMarkOffset = (maskOffset?: MaskOffset) => {
@@ -386,6 +295,46 @@ export const svgMaskPathMorph = ({
   animation,
   to: { position, size, shape, maskOffset, borderRadius, borderRadiusObject },
 }: SVGMaskPathMorphParam) => {
+  console.log('🔧 svgMaskPathMorph: Parámetros recibidos:', {
+    previousPath: previousPath.substring(0, 50) + '...',
+    animationValue: animation._value,
+    position,
+    size,
+    shape,
+    maskOffset,
+    borderRadius,
+    borderRadiusObject,
+  })
+
+  // Si la animación está completa, usar la función simplificada
+  const animValue = clamp(animation._value, 0, 1)
+  if (animValue >= 0.99) {
+    console.log(
+      '🔧 svgMaskPathMorph: Usando función simplificada (animación completa)',
+    )
+
+    // Extraer dimensiones del canvas del previousPath
+    const canvasMatch = previousPath.match(
+      /M0,0H(\d+(?:\.\d+)?)V(\d+(?:\.\d+)?)H0V0Z/,
+    )
+    if (canvasMatch) {
+      const canvasWidth = parseFloat(canvasMatch[1])
+      const canvasHeight = parseFloat(canvasMatch[2])
+      const offset = typeof maskOffset === 'number' ? maskOffset : 0
+
+      return createMaskPathWithHole(
+        canvasWidth,
+        canvasHeight,
+        position,
+        size,
+        offset,
+        borderRadius || 0,
+      )
+    }
+  }
+
+  console.log('🔧 svgMaskPathMorph: Usando interpolador original')
+
   // Use enhanced interpolator that supports both number and object maskOffset
   const interpolator = getInterpolatorEnhanced(
     cleanPath(previousPath),
@@ -397,7 +346,74 @@ export const svgMaskPathMorph = ({
     borderRadiusObject,
   )
 
-  return `${getCanvasPath(previousPath)}${interpolator(
-    clamp(animation._value, 0, 1),
-  )}`
+  console.log('🔧 svgMaskPathMorph: Interpolator creado')
+
+  const canvasPath = getCanvasPath(previousPath)
+  console.log('🔧 svgMaskPathMorph: Canvas path:', canvasPath)
+
+  const interpolatedPath = interpolator(animValue)
+  console.log(
+    '🔧 svgMaskPathMorph: Interpolated path:',
+    interpolatedPath.substring(0, 50) + '...',
+  )
+
+  const result = `${canvasPath}${interpolatedPath}`
+  console.log(
+    '🔧 svgMaskPathMorph: Resultado final:',
+    result.substring(0, 100) + '...',
+  )
+
+  return result
+}
+
+// Helper function to create SVG path with hole for highlighted element
+export const createMaskPathWithHole = (
+  canvasWidth: number,
+  canvasHeight: number,
+  holePosition: ValueXY,
+  holeSize: ValueXY,
+  maskOffset: number = 0,
+  borderRadius: number = 0,
+): string => {
+  console.log('🔧 createMaskPathWithHole:', {
+    canvasWidth,
+    canvasHeight,
+    holePosition,
+    holeSize,
+    maskOffset,
+    borderRadius,
+  })
+
+  // Calculate hole bounds with offset
+  const x = holePosition.x - maskOffset
+  const y = holePosition.y - maskOffset
+  const width = holeSize.x + maskOffset * 2
+  const height = holeSize.y + maskOffset * 2
+
+  console.log('🔧 Hole bounds:', { x, y, width, height })
+
+  // Create path that fills entire canvas
+  let path = `M0,0H${canvasWidth}V${canvasHeight}H0V0Z`
+
+  // Add hole (subtract from filled area using even-odd fill rule)
+  if (borderRadius > 0) {
+    // Rounded rectangle hole
+    path += `M${x + borderRadius},${y}`
+    path += `H${x + width - borderRadius}`
+    path += `Q${x + width},${y} ${x + width},${y + borderRadius}`
+    path += `V${y + height - borderRadius}`
+    path += `Q${x + width},${y + height} ${x + width - borderRadius},${
+      y + height
+    }`
+    path += `H${x + borderRadius}`
+    path += `Q${x},${y + height} ${x},${y + height - borderRadius}`
+    path += `V${y + borderRadius}`
+    path += `Q${x},${y} ${x + borderRadius},${y}Z`
+  } else {
+    // Rectangular hole
+    path += `M${x},${y}H${x + width}V${y + height}H${x}V${y}Z`
+  }
+
+  console.log('🔧 Generated path:', path)
+  return path
 }

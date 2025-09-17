@@ -14,12 +14,51 @@ import {
   BorderRadiusObject,
   IStep,
   Labels,
+  LeaderLineConfig,
   MaskOffset,
   ValueXY,
 } from '../types'
-import styles, { MARGIN } from './style'
+import styles, { MARGIN, LEADER_LINE_Z_INDEX, TOOLTIP_Z_INDEX } from './style'
 import { SvgMask } from './SvgMask'
 import { Tooltip, TooltipProps } from './Tooltip'
+
+declare var __TEST__: boolean
+
+// Import official types and components from react-native-leader-line
+import type { PlugType } from 'react-native-leader-line'
+import { LeaderLineClass, createLeaderLine } from 'react-native-leader-line'
+
+// DEBUGGING VERSION - NUEVA ESTRATEGIA Z-INDEX SVG CONTEXT FIX
+const DEBUG_VERSION = 'v2.5.0-ZINDEX-SVG-FIX'
+
+// Verificar que LeaderLine está disponible y logging inicial
+console.log(`🎯 ===== MODAL VERSION ${DEBUG_VERSION} LOADED ===== 🎯`)
+console.log(
+  `🏹 Modal: [${DEBUG_VERSION}] LeaderLineClass type:`,
+  typeof LeaderLineClass,
+)
+console.log(
+  `🏹 Modal: [${DEBUG_VERSION}] createLeaderLine type:`,
+  typeof createLeaderLine,
+)
+
+try {
+  if (typeof createLeaderLine === 'function') {
+    console.log(
+      `🏹 Modal: [${DEBUG_VERSION}] ✅ createLeaderLine está disponible como función`,
+    )
+  } else {
+    console.error(
+      `🏹 Modal: [${DEBUG_VERSION}] ❌ createLeaderLine NO es una función, tipo:`,
+      typeof createLeaderLine,
+    )
+  }
+} catch (error) {
+  console.error(
+    `🏹 Modal: [${DEBUG_VERSION}] ❌ Error al verificar createLeaderLine:`,
+    error,
+  )
+}
 
 declare var __TEST__: boolean
 
@@ -45,6 +84,8 @@ export interface ModalProps {
   prev: () => void
   preventOutsideInteraction?: boolean
   persistTooltip?: boolean
+  leaderLineConfig?: LeaderLineConfig
+  highlightedElementRef?: React.RefObject<View>
 }
 
 interface Layout {
@@ -79,7 +120,7 @@ export class Modal extends React.Component<ModalProps, State> {
   static defaultProps = {
     easing: Easing.elastic(0.7),
     animationDuration: 400,
-    tooltipComponent: Tooltip as any,
+    tooltipComponent: Tooltip,
     tooltipStyle: {},
     androidStatusBarVisible: false,
     backdropColor: 'rgba(0, 0, 0, 0.4)',
@@ -88,19 +129,16 @@ export class Modal extends React.Component<ModalProps, State> {
     preventOutsideInteraction: false,
   }
 
-  layout?: Layout = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  }
+  layout?: Layout
+  private tooltipRef = React.createRef<View>()
+  private leaderLineInstance: any = null
 
   state = {
-    isFirstStep: false,
-    isLastStep: false,
+    isFirstStep: this.props.isFirstStep,
+    isLastStep: this.props.isLastStep,
     tooltip: {},
     containerVisible: false,
-    tooltipTranslateY: new Animated.Value(400),
+    tooltipTranslateY: new Animated.Value(0),
     opacity: new Animated.Value(0),
     layout: undefined,
     size: undefined,
@@ -113,8 +151,40 @@ export class Modal extends React.Component<ModalProps, State> {
   }
 
   componentDidUpdate(prevProps: ModalProps) {
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] componentDidUpdate() llamado`)
+    console.log(
+      `🏹 Modal: [${DEBUG_VERSION}] visible cambió de`,
+      prevProps.visible,
+      'a',
+      this.props.visible,
+    )
+
     if (prevProps.visible === true && this.props.visible === false) {
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] Modal se ocultó, ejecutando reset...`)
       this.reset()
+    }
+
+    // Z-INDEX FIX: Usar !prevProps.visible en lugar de prevProps.visible === false
+    if (!prevProps.visible && this.props.visible === true) {
+      console.log(
+        `🏹 Modal: [${DEBUG_VERSION}] Modal se hizo visible, creando LeaderLine con delay...`,
+      )
+      setTimeout(() => {
+        console.log(
+          `🏹 Modal: [${DEBUG_VERSION}] 🕐 Creando LeaderLine después de delay para renderizado completo...`,
+        )
+        this.createLeaderLine()
+      }, 400)
+    }
+
+    if (
+      prevProps.currentStep !== this.props.currentStep &&
+      this.props.visible
+    ) {
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] Paso cambió y modal es visible, recreando LeaderLine...`)
+      setTimeout(() => {
+        this.createLeaderLine()
+      }, 200)
     }
   }
 
@@ -288,10 +358,218 @@ export class Modal extends React.Component<ModalProps, State> {
   }
 
   reset() {
+    this.cleanupLeaderLine()
     this.setState({
       containerVisible: false,
       layout: undefined,
     })
+  }
+
+  // Z-INDEX STRATEGY: LeaderLine methods with proper z-index configuration
+  private createLeaderLine = () => {
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] createLeaderLine() llamado`)
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] ⚡ INICIO DE CREACIÓN DE LEADERLINE ⚡`)
+
+    try {
+      this.cleanupLeaderLine()
+
+      const config = this.getLeaderLineConfig()
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine config:`, config)
+
+      if (!config.enabled) {
+        console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine deshabilitado (config.enabled=false)`)
+        return
+      }
+
+      const hasTooltipRef = !!this.tooltipRef.current
+      const hasElementRef = !!this.props.highlightedElementRef?.current
+
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] Refs disponibles:`, {
+        tooltipRef: hasTooltipRef,
+        highlightedElementRef: hasElementRef,
+      })
+
+      if (!hasTooltipRef || !hasElementRef) {
+        console.log(`🏹 Modal: [${DEBUG_VERSION}] Refs no disponibles, reintentando en 100ms...`)
+        setTimeout(() => {
+          this.createLeaderLine()
+        }, 100)
+        return
+      }
+
+      const sourceElement = this.props.highlightedElementRef!.current
+      const targetElement = this.tooltipRef.current
+
+      if (sourceElement && targetElement) {
+        sourceElement.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] 📍 Elemento origen posición:`, { x, y, width, height, pageX, pageY })
+        })
+        targetElement.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] 📍 Elemento destino posición:`, { x, y, width, height, pageX, pageY })
+        })
+      }
+
+      const { enabled, ...leaderLineOptions } = config
+
+      // Z-INDEX CRITICAL: Configurar z-index para LeaderLine SVG
+      const leaderLineOptionsWithZIndex = {
+        ...leaderLineOptions,
+        // Agregar configuración específica para React Native
+        zIndex: LEADER_LINE_Z_INDEX, // 10000 - por encima del backdrop (9999) pero debajo del tooltip (10001)
+        elevation: LEADER_LINE_Z_INDEX, // Para Android
+        // Configuración adicional para forzar rendering
+        svgStyle: {
+          zIndex: LEADER_LINE_Z_INDEX,
+          elevation: LEADER_LINE_Z_INDEX,
+          position: 'absolute',
+        }
+      }
+
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] Creando LeaderLine con opciones Z-INDEX:`, leaderLineOptionsWithZIndex)
+
+      this.leaderLineInstance = createLeaderLine(
+        this.props.highlightedElementRef!.current!,
+        this.tooltipRef.current!,
+        leaderLineOptionsWithZIndex
+      )
+
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine creado exitosamente:`, !!this.leaderLineInstance)
+      console.log(`🎯 ===== LEADERLINE CREATION STATUS: ${!!this.leaderLineInstance ? 'SUCCESS' : 'FAILED'} [${DEBUG_VERSION}] ===== 🎯`)
+
+      if (this.leaderLineInstance) {
+        this.forceLeaderLineVisibility()
+        
+        // Z-INDEX POST-PROCESAMIENTO: Intentar manipular el SVG después de la creación
+        setTimeout(() => {
+          this.applyZIndexPostProcessing()
+        }, 100)
+      }
+    } catch (error) {
+      console.error(`🏹 Modal: [${DEBUG_VERSION}] Error al crear LeaderLine:`, error)
+    }
+  }
+
+  private forceLeaderLineVisibility = () => {
+    if (!this.leaderLineInstance) return
+
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🚀 FORZANDO VISIBILIDAD DE LEADERLINE...`)
+
+    // Strategy 1: Show inmediato
+    try {
+      this.leaderLineInstance.show?.()
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show inmediato ejecutado`)
+    } catch (error) {
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en show inmediato:`, error)
+    }
+
+    // Strategy 2: Múltiples intentos con delays
+    const delays = [50, 100, 200, 500, 1000]
+    delays.forEach((delay) => {
+      setTimeout(() => {
+        try {
+          this.leaderLineInstance?.show?.()
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show ejecutado después de ${delay}ms`)
+        } catch (error) {
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en show después de ${delay}ms:`, error)
+        }
+      }, delay)
+    })
+
+    // Strategy 3: Force position update + show final
+    setTimeout(() => {
+      try {
+        const instance = this.leaderLineInstance
+        if (instance.position) {
+          instance.position()
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Position() forzado`)
+        }
+        if (instance.show) {
+          instance.show()
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show final después de position()`)
+        }
+      } catch (error) {
+        console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error forzando position:`, error)
+      }
+    }, 600)
+  }
+
+  private applyZIndexPostProcessing = () => {
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 Aplicando post-procesamiento Z-INDEX...`)
+    
+    try {
+      // Intentar acceder al SVG del LeaderLine y aplicar z-index
+      if (this.leaderLineInstance && typeof this.leaderLineInstance === 'object') {
+        const instance = this.leaderLineInstance
+        
+        // Buscar el componente SVG en las propiedades del LeaderLine
+        const svgElement = instance.component || instance.svg || instance._svg
+        
+        if (svgElement) {
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 SVG encontrado, aplicando z-index...`)
+          
+          // Aplicar estilos z-index al SVG
+          if (svgElement.style) {
+            svgElement.style.zIndex = LEADER_LINE_Z_INDEX.toString()
+            svgElement.style.elevation = LEADER_LINE_Z_INDEX.toString()
+            svgElement.style.position = 'absolute'
+            console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Z-index aplicado al SVG: ${LEADER_LINE_Z_INDEX}`)
+          }
+          
+          // También intentar con propiedades React Native
+          if (svgElement.props) {
+            svgElement.props = {
+              ...svgElement.props,
+              style: {
+                ...svgElement.props.style,
+                zIndex: LEADER_LINE_Z_INDEX,
+                elevation: LEADER_LINE_Z_INDEX,
+              }
+            }
+            console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Z-index aplicado a props del SVG`)
+          }
+        } else {
+          console.log(`🏹 Modal: [${DEBUG_VERSION}] ⚠️ SVG no encontrado en LeaderLine instance`)
+        }
+      }
+    } catch (error) {
+      console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en post-procesamiento Z-INDEX:`, error)
+    }
+  }
+
+  private cleanupLeaderLine = () => {
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] cleanupLeaderLine() llamado`)
+    if (this.leaderLineInstance) {
+      try {
+        console.log(`🏹 Modal: [${DEBUG_VERSION}] Limpiando LeaderLine existente...`)
+        this.leaderLineInstance.remove()
+        console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine removido exitosamente`)
+      } catch (error) {
+        console.error(`🏹 Modal: [${DEBUG_VERSION}] Error al limpiar LeaderLine:`, error)
+      }
+      this.leaderLineInstance = null
+    }
+  }
+
+  private getLeaderLineConfig = (): LeaderLineConfig & { enabled: boolean } => {
+    const defaults = {
+      enabled: true,
+      color: '#FF6B6B', // Rojo brillante para mejor visibilidad
+      size: 4,          // Grosor aumentado
+      startPlug: 'disc' as PlugType,
+      endPlug: 'arrow1' as PlugType,
+    }
+
+    const stepConfig = this.props.currentStep?.leaderLineConfig
+    const providerConfig = this.props.leaderLineConfig
+
+    const finalConfig = {
+      ...defaults,
+      ...providerConfig,
+      ...stepConfig,
+    }
+
+    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 Configuración final de LeaderLine:`, finalConfig)
+    return finalConfig
   }
 
   handleNext = () => {
@@ -345,6 +623,7 @@ export class Modal extends React.Component<ModalProps, State> {
 
     return (
       <Animated.View
+        ref={this.tooltipRef}
         pointerEvents='box-none'
         key='tooltip'
         style={[
@@ -352,7 +631,8 @@ export class Modal extends React.Component<ModalProps, State> {
           this.props.tooltipStyle,
           horizontalStyles, // Apply only when tooltipLeftOffset is defined
           {
-            zIndex: 99,
+            zIndex: TOOLTIP_Z_INDEX, // CRITICAL FIX: Superior al backdrop (9999) y LeaderLine (10000)
+            elevation: TOOLTIP_Z_INDEX, // Para Android
             opacity,
             transform: [{ translateY: this.state.tooltipTranslateY }],
           },

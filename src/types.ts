@@ -4,6 +4,14 @@ export type Shape =
   | 'circle_and_keep'
   | 'rectangle_and_keep'
 
+// Import official types from react-native-leader-line instead of defining our own
+import type { LeaderLineOptions } from 'react-native-leader-line'
+
+// Use a subset of the official LeaderLineOptions for our config
+export type LeaderLineConfig = Partial<LeaderLineOptions> & {
+  enabled?: boolean // Our custom addition for enabling/disabling
+}
+
 export interface IStep {
   name: string
   order: number
@@ -18,6 +26,7 @@ export interface IStep {
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
   borderRadiusObject?: BorderRadiusObject
+  leaderLineConfig?: LeaderLineConfig
 }
 export interface StepObject {
   [key: string]: IStep

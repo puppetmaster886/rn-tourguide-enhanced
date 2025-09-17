@@ -1,5 +1,10 @@
 import * as React from 'react'
-import { BorderRadiusObject, MaskOffset, Shape } from '../types'
+import {
+  BorderRadiusObject,
+  LeaderLineConfig,
+  MaskOffset,
+  Shape,
+} from '../types'
 import { ConnectedStep } from './ConnectedStep'
 import { TourGuideContext } from './TourGuideContext'
 
@@ -17,6 +22,7 @@ interface Props {
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
   borderRadiusObject?: BorderRadiusObject
+  leaderLineConfig?: LeaderLineConfig
 }
 
 export const Step = (props: Props) => {

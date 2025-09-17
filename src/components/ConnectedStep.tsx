@@ -1,5 +1,11 @@
 import * as React from 'react'
-import { BorderRadiusObject, MaskOffset, Shape } from '../types'
+import { View } from 'react-native'
+import {
+  BorderRadiusObject,
+  LeaderLineConfig,
+  MaskOffset,
+  Shape,
+} from '../types'
 import { ITourGuideContext } from './TourGuideContext'
 
 declare var __TEST__: boolean
@@ -18,6 +24,7 @@ interface Props {
   borderRadius?: number
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
+  leaderLineConfig?: LeaderLineConfig
 }
 
 export class ConnectedStep extends React.Component<Props> {
@@ -25,9 +32,12 @@ export class ConnectedStep extends React.Component<Props> {
     active: true,
   }
   wrapper: any
+  wrapperRef = React.createRef<View>()
+
   componentDidMount() {
     if (this.props.active) {
       this.register()
+      this.registerElementRef()
     }
   }
 
@@ -35,14 +45,17 @@ export class ConnectedStep extends React.Component<Props> {
     if (this.props.active !== prevProps.active) {
       if (this.props.active) {
         this.register()
+        this.registerElementRef()
       } else {
         this.unregister()
+        this.unregisterElementRef()
       }
     }
   }
 
   componentWillUnmount() {
     this.unregister()
+    this.unregisterElementRef()
   }
 
   setNativeProps(obj: any) {
@@ -66,6 +79,28 @@ export class ConnectedStep extends React.Component<Props> {
       this.props.context.unregisterStep(this.props.tourKey, this.props.name)
     } else {
       console.warn('unregisterStep undefined')
+    }
+  }
+
+  registerElementRef() {
+    if (
+      this.props.context &&
+      this.props.context.registerHighlightedElementRef &&
+      this.wrapperRef
+    ) {
+      this.props.context.registerHighlightedElementRef(
+        this.props.tourKey,
+        this.wrapperRef,
+      )
+    }
+  }
+
+  unregisterElementRef() {
+    if (
+      this.props.context &&
+      this.props.context.unregisterHighlightedElementRef
+    ) {
+      this.props.context.unregisterHighlightedElementRef(this.props.tourKey)
     }
   }
 
@@ -116,6 +151,11 @@ export class ConnectedStep extends React.Component<Props> {
     const copilot = {
       ref: (wrapper: any) => {
         this.wrapper = wrapper
+        // Also assign to the React ref for LeaderLine
+        if (this.wrapperRef.current !== wrapper) {
+          // @ts-ignore - assigning the wrapper element to the ref
+          this.wrapperRef.current = wrapper
+        }
       },
       onLayout: () => {}, // Android hack
     }

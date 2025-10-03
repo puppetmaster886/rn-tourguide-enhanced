@@ -75,9 +75,14 @@ export const defaultSvgPath = ({
   borderRadiusObject?: BorderRadiusObject
 }): SvgPath => {
   // Validate inputs to prevent NaN
-  if (!size || !position ||
-      isNaN(size.x) || isNaN(size.y) ||
-      isNaN(position.x) || isNaN(position.y)) {
+  if (
+    !size ||
+    !position ||
+    isNaN(size.x) ||
+    isNaN(size.y) ||
+    isNaN(position.x) ||
+    isNaN(position.y)
+  ) {
     return 'M0,0 h 1 v 1 h -1 Z'
   }
 
@@ -125,9 +130,14 @@ export const circleSvgPath = ({
   position: ValueXY
 }): SvgPath => {
   // Validate inputs to prevent NaN
-  if (!size || !position ||
-      isNaN(size.x) || isNaN(size.y) ||
-      isNaN(position.x) || isNaN(position.y)) {
+  if (
+    !size ||
+    !position ||
+    isNaN(size.x) ||
+    isNaN(size.y) ||
+    isNaN(position.x) ||
+    isNaN(position.y)
+  ) {
     return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
   }
 
@@ -160,23 +170,28 @@ export const ellipseSvgPath = ({
   position: ValueXY
 }): SvgPath => {
   // Validate inputs to prevent NaN
-  if (!size || !position ||
-      isNaN(size.x) || isNaN(size.y) ||
-      isNaN(position.x) || isNaN(position.y)) {
+  if (
+    !size ||
+    !position ||
+    isNaN(size.x) ||
+    isNaN(size.y) ||
+    isNaN(position.x) ||
+    isNaN(position.y)
+  ) {
     return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
   }
 
   // ⚠️ WARNING: Elementos con dimensiones 0 (como triángulos CSS)
   if (size.x === 0 || size.y === 0) {
-    const minSizeX = 100  // Ancho
-    const minSizeY = 60   // Alto
+    const minSizeX = 100 // Ancho
+    const minSizeY = 60 // Alto
     const radiusX = minSizeX / 2
     const radiusY = minSizeY / 2
     return [
       `M${position.x - minSizeX / 8},${position.y + minSizeY / 2}`,
-      `a${radiusX} ${radiusY} 0 1 0 ${radiusX * 2} 0 ${radiusX} ${radiusY} 0 1 0-${
+      `a${radiusX} ${radiusY} 0 1 0 ${
         radiusX * 2
-      } 0`,
+      } 0 ${radiusX} ${radiusY} 0 1 0-${radiusX * 2} 0`,
     ].join('')
   }
 
@@ -184,9 +199,9 @@ export const ellipseSvgPath = ({
   const radiusY = Math.round(size.y / 2)
   return [
     `M${position.x - size.x / 8},${position.y + size.y / 2}`,
-    `a${radiusX} ${radiusY} 0 1 0 ${radiusX * 2} 0 ${radiusX} ${radiusY} 0 1 0-${
+    `a${radiusX} ${radiusY} 0 1 0 ${
       radiusX * 2
-    } 0`,
+    } 0 ${radiusX} ${radiusY} 0 1 0-${radiusX * 2} 0`,
   ].join('')
 }
 
@@ -377,9 +392,14 @@ export const svgMaskPathMorph = ({
   to: { position, size, shape, maskOffset, borderRadius, borderRadiusObject },
 }: SVGMaskPathMorphParam) => {
   // Validate position and size to prevent NaN in path
-  if (!position || !size ||
-      isNaN(position.x) || isNaN(position.y) ||
-      isNaN(size.x) || isNaN(size.y)) {
+  if (
+    !position ||
+    !size ||
+    isNaN(position.x) ||
+    isNaN(position.y) ||
+    isNaN(size.x) ||
+    isNaN(size.y)
+  ) {
     return previousPath
   }
 
@@ -402,7 +422,7 @@ export const svgMaskPathMorph = ({
         size,
         offset,
         borderRadius || 0,
-        shape,  // ⭐ CRÍTICO: Pasar el shape para que se aplique!
+        shape, // ⭐ CRÍTICO: Pasar el shape para que se aplique!
       )
     }
   }
@@ -426,7 +446,10 @@ export const svgMaskPathMorph = ({
   const interpolatedPath = interpolator(animValue)
 
   // Validate interpolated path doesn't contain NaN
-  if (typeof interpolatedPath === 'string' && interpolatedPath.includes('NaN')) {
+  if (
+    typeof interpolatedPath === 'string' &&
+    interpolatedPath.includes('NaN')
+  ) {
     const fallbackPath = defaultSvgPath({
       size,
       position,
@@ -442,9 +465,10 @@ export const svgMaskPathMorph = ({
     : interpolatedPath
 
   // More thorough NaN detection
-  const hasNaN = pathString.includes('NaN') ||
-                 pathString.includes(' N') ||
-                 /\sNaN|\sN[^0-9]/.test(pathString)
+  const hasNaN =
+    pathString.includes('NaN') ||
+    pathString.includes(' N') ||
+    /\sNaN|\sN[^0-9]/.test(pathString)
 
   if (hasNaN) {
     const fallbackPath = defaultSvgPath({
@@ -480,14 +504,21 @@ export const createMaskPathWithHole = (
   holeSize: ValueXY,
   maskOffset: number = 0,
   borderRadius: number = 0,
-  shape?: Shape,  // ⭐ Nuevo parámetro para soportar diferentes shapes
+  shape?: Shape, // ⭐ Nuevo parámetro para soportar diferentes shapes
 ): string => {
   // Validate inputs to prevent NaN in path
-  if (!holePosition || !holeSize ||
-      isNaN(holePosition.x) || isNaN(holePosition.y) ||
-      isNaN(holeSize.x) || isNaN(holeSize.y) ||
-      isNaN(canvasWidth) || isNaN(canvasHeight) ||
-      isNaN(maskOffset) || isNaN(borderRadius)) {
+  if (
+    !holePosition ||
+    !holeSize ||
+    isNaN(holePosition.x) ||
+    isNaN(holePosition.y) ||
+    isNaN(holeSize.x) ||
+    isNaN(holeSize.y) ||
+    isNaN(canvasWidth) ||
+    isNaN(canvasHeight) ||
+    isNaN(maskOffset) ||
+    isNaN(borderRadius)
+  ) {
     return `M0,0H${canvasWidth || 100}V${canvasHeight || 100}H0V0Z`
   }
 

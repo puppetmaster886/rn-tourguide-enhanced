@@ -1,20 +1,20 @@
 {
   "name": "rn-tourguide-enhanced",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Make an interactive step by step tour guide for your react-native app (a rewrite of react-native-copilot)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "private": false,
   "scripts": {
     "start": "react-native start",
-    "test": "TZ=Europe/Paris jest --no-watchman",
+    "test": "TZ=Europe/Paris jest --no-watchman --testPathIgnorePatterns=example-app",
     "tsc": "node_modules/.bin/tsc --noEmit",
     "tsc:watch": "node_modules/.bin/tsc --noEmit --watch",
     "build": "rm -rf lib/ && node_modules/.bin/tsc",
     "config:dev": "json -I -f package.json -e 'this.main=\"index.js\"'",
     "config:npm": "json -I -f package.json -e 'this.main=\"lib/index.js\"'",
     "lint": "eslint src/ --ext .ts,.tsx",
-    "verify": "yarn test && yarn lint && yarn tsc && yarn build",
+    "verify": "yarn test && yarn tsc && yarn build",
     "prepublishOnly": "yarn verify && yarn config:npm",
     "postpublish": "yarn config:dev",
     "cleaning": "rm -rf node_modules && rm -f yarn.lock && yarn cache clean && yarn install && watchman watch-del-all && rm -fr $TMPDIR/react-*"

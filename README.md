@@ -10,8 +10,8 @@
   <img width="250" src="https://www.dropbox.com/s/9heua3qgd66125k/rn-tourguide.gif?dl=0&raw=1" alt="RN Tourguide" />
 </p>
 <p align="center">
-    <a href="https://xcarpentier.github.io/rn-tourguide/">
-      🎉DEMO WEB 🎉
+    <a href="https://puppetmaster886.github.io/rn-tourguide-enhanced/">
+      🎉 DEMO WEB 🎉
     </a>
 </p>
 
@@ -319,10 +319,12 @@ interface TourGuideZoneProps {
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
+  tooltipPosition?: TooltipPosition // 'relative' | 'centered' | 'auto' - controls tooltip positioning strategy
   children: React.ReactNode
 }
 
 type Shape = 'circle' | 'rectangle' | 'circle_and_keep' | 'rectangle_and_keep'
+type TooltipPosition = 'centered' | 'relative' | 'auto'
 
 export interface TourGuideProviderProps {
   tooltipComponent?: React.ComponentType<TooltipProps>
@@ -573,6 +575,37 @@ Control the horizontal position of tooltips:
   <Button title='Custom left positioning' />
 </TourGuideZone>
 ```
+
+#### Tooltip Position Strategy
+
+Control how the tooltip is positioned relative to the highlighted element:
+
+```tsx
+// 'relative' - Always position relative to highlighted element (default, original behavior)
+// Tooltip will move to avoid overlapping with the highlighted area
+<TourGuideZone zone={1} tooltipPosition='relative'>
+  <Button title='Relative positioning' />
+</TourGuideZone>
+
+// 'centered' - Always center the tooltip on screen
+// Useful for important messages or when you want consistent positioning
+<TourGuideZone zone={2} tooltipPosition='centered'>
+  <Button title='Centered tooltip' />
+</TourGuideZone>
+
+// 'auto' - Smart positioning (centers if no overlap, relative if overlap detected)
+// Best of both worlds for flexible layouts
+<TourGuideZone zone={3} tooltipPosition='auto'>
+  <Button title='Auto positioning' />
+</TourGuideZone>
+```
+
+**Available values:**
+- `'relative'` (default): Tooltip always positions relative to the highlighted element, avoiding overlap. This is the original rn-tourguide behavior.
+- `'centered'`: Tooltip always stays centered on screen, regardless of highlighted element position.
+- `'auto'`: Automatically detects overlap. Centers the tooltip if there's no overlap with the highlighted element, otherwise uses relative positioning.
+
+**Note:** The `tooltipLeftOffset` parameter takes precedence over `tooltipPosition` when both are specified.
 
 ### Enhanced Mask Offset
 

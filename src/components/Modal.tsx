@@ -263,7 +263,8 @@ export class Modal extends React.Component<ModalProps, State> {
     }
 
     // Determine positioning strategy
-    const tooltipPosition = this.props.currentStep?.tooltipPosition || 'relative'
+    const tooltipPosition =
+      this.props.currentStep?.tooltipPosition || 'relative'
     const customLeftOffset = this.props.currentStep?.tooltipLeftOffset
 
     // Custom left offset takes precedence over all positioning strategies
@@ -365,7 +366,8 @@ export class Modal extends React.Component<ModalProps, State> {
           tooltip.maxWidth = layout.width! - tooltip.right - MARGIN
         } else {
           tooltip.left = Math.max(obj.left, 0)
-          tooltip.left = tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
+          tooltip.left =
+            tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
           tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
         }
       }
@@ -508,7 +510,9 @@ export class Modal extends React.Component<ModalProps, State> {
     }
 
     // CRITICAL FIX: Force re-mount on step change to ensure onLayout is always called
-    const highlightedKey = `highlighted-${this.props.currentStep?.name || 'none'}`
+    const highlightedKey = `highlighted-${
+      this.props.currentStep?.name || 'none'
+    }`
 
     // View invisible posicionado en el área destacada para servir como referencia de LeaderLine
     return (

@@ -1,5 +1,5 @@
 import mitt, { Emitter } from 'mitt'
-import * as React from 'react'
+import React, { useMemo, useEffect, useState, useRef } from 'react'
 import {
   Dimensions,
   findNodeHandle,
@@ -16,7 +16,6 @@ import { OFFSET_WIDTH } from './style'
 import { TooltipProps } from './Tooltip'
 import { Ctx, TourGuideContext } from './TourGuideContext'
 
-const { useMemo, useEffect, useState, useRef } = React
 /*
 This is the maximum wait time for the steps to be registered before starting the tutorial
 At 60fps means 2 seconds
@@ -90,38 +89,20 @@ export const TourGuideProvider = ({
     key: string,
     ref: React.RefObject<View>,
   ) => {
-    console.log('🏹 TourGuideProvider: registerHighlightedElementRef llamado')
-    console.log('🏹 TourGuideProvider: key:', key)
-    console.log('🏹 TourGuideProvider: ref:', !!ref)
-    console.log('🏹 TourGuideProvider: ref.current:', !!ref?.current)
-
     setHighlightedElementRef((prev) => {
       const newRefs = {
         ...prev,
         [key]: ref,
       }
-      console.log(
-        '🏹 TourGuideProvider: highlightedElementRef actualizado:',
-        Object.keys(newRefs),
-      )
       return newRefs
     })
   }
 
   // Function to unregister highlighted element ref
   const unregisterHighlightedElementRef = (key: string) => {
-    console.log(
-      '🏹 TourGuideProvider: unregisterHighlightedElementRef llamado para key:',
-      key,
-    )
-
     setHighlightedElementRef((prev) => {
       const newRefs = { ...prev }
       delete newRefs[key]
-      console.log(
-        '🏹 TourGuideProvider: highlightedElementRef después de unregister:',
-        Object.keys(newRefs),
-      )
       return newRefs
     })
   }
@@ -132,6 +113,16 @@ export const TourGuideProvider = ({
   const { current: eventEmitter } = useRef<Ctx<Emitter>>({
     _default: new mitt(),
   })
+
+  // Ensure eventEmitter is initialized for any key requested
+  // @ts-ignore - Reserved for future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getOrCreateEventEmitter = (key: string) => {
+    if (!eventEmitter[key]) {
+      eventEmitter[key] = new mitt()
+    }
+    return eventEmitter[key]
+  }
 
   const modal = useRef<any>()
 
@@ -170,9 +161,10 @@ export const TourGuideProvider = ({
   useEffect(() => {
     if (mounted) {
       if (steps[tourKey]) {
+        const stepData = steps[tourKey]
         if (
-          (Array.isArray(steps[tourKey]) && steps[tourKey].length > 0) ||
-          Object.entries(steps[tourKey]).length > 0
+          (Array.isArray(stepData) && stepData.length > 0) ||
+          (!Array.isArray(stepData) && Object.entries(stepData).length > 0)
         ) {
           setCanStart((obj) => {
             const newObj = { ...obj }
@@ -196,12 +188,7 @@ export const TourGuideProvider = ({
   }, [mounted, steps])
 
   const moveToCurrentStep = async (key: string) => {
-    console.log(
-      '🎯 TourGuideProvider: moveToCurrentStep() llamado con key:',
-      key,
-    )
     const size = await currentStep[key]?.target.measure()
-    console.log('🎯 TourGuideProvider: size medido:', size)
 
     if (
       size === undefined ||
@@ -210,7 +197,6 @@ export const TourGuideProvider = ({
       isNaN(size.x) ||
       isNaN(size.y)
     ) {
-      console.log('🎯 TourGuideProvider: size inválido, retornando')
       return
     }
 
@@ -221,13 +207,10 @@ export const TourGuideProvider = ({
       top: Math.round(size.y) - OFFSET_WIDTH / 2 + (verticalOffset || 0),
     }
 
-    console.log('🎯 TourGuideProvider: llamando animateMove con:', moveParams)
-
     // COORDINACIÓN MEJORADA: Ejecutar animaciones secuencialmente
     // Esto evita conflictos entre SvgMask y Modal animaciones
     try {
       await modal.current?.animateMove(moveParams)
-      console.log('🎯 TourGuideProvider: animateMove completado')
 
       // Pequeño delay para asegurar que las animaciones se estabilicen
       await new Promise((resolve) => setTimeout(resolve, 100))
@@ -235,38 +218,28 @@ export const TourGuideProvider = ({
       // Forzar un re-render final para asegurar visibilidad
       if (modal.current) {
         setTimeout(() => {
-          console.log(
-            '🎯 TourGuideProvider: Forzando re-render final del Modal',
-          )
-          modal.current.forceUpdate()
+          // Null-safe check: modal might unmount before timeout executes
+          if (modal.current) {
+            modal.current.forceUpdate()
+          }
         }, 50)
       }
     } catch (error) {
-      console.error('🎯 TourGuideProvider: Error en animateMove:', error)
+      // Error en animateMove
     }
   }
 
   const setCurrentStep = async (key: string, step?: IStep) =>
     new Promise<void>(async (resolve) => {
-      console.log('📝 TourGuideProvider: setCurrentStep() llamado')
-      console.log('📝 TourGuideProvider: key:', key)
-      console.log('📝 TourGuideProvider: step:', step?.name || 'no-step')
-      console.log('📝 TourGuideProvider: scrollRef:', !!scrollRef)
-
       if (scrollRef && step) {
-        console.log('📝 TourGuideProvider: midiendo layout para scroll')
         await step.wrapper.measureLayout(
           findNodeHandle(scrollRef.current),
           (_x: number, y: number, _w: number, h: number) => {
             const yOffsett = y > 0 ? y - h / 2 : 0
-            console.log('📝 TourGuideProvider: haciendo scroll a:', yOffsett)
             scrollRef.current.scrollTo({ y: yOffsett, animated: false })
           },
         )
         setTimeout(() => {
-          console.log(
-            '📝 TourGuideProvider: actualizando currentStep después del scroll',
-          )
           updateCurrentStep((currentStep) => {
             const newStep = { ...currentStep }
             newStep[key] = step
@@ -276,7 +249,6 @@ export const TourGuideProvider = ({
           resolve()
         }, 100)
       } else {
-        console.log('📝 TourGuideProvider: actualizando currentStep sin scroll')
         updateCurrentStep((currentStep) => {
           const newStep = { ...currentStep }
           newStep[key] = step
@@ -384,22 +356,48 @@ export const TourGuideProvider = ({
   const next = () => _next(tourKey)
   const prev = () => _prev(tourKey)
   const stop = () => _stop(tourKey)
+
+  // Enhanced context value with automatic eventEmitter initialization
+  const contextValue = useMemo(() => {
+    const proxiedEventEmitter = new Proxy(eventEmitter, {
+      get: (target, key: string) => {
+        if (!target[key]) {
+          target[key] = new mitt()
+        }
+
+        const result = target[key]
+        return result
+      },
+    })
+
+    return {
+      eventEmitter: proxiedEventEmitter,
+      registerStep,
+      unregisterStep,
+      getCurrentStep,
+      start,
+      stop,
+      canStart,
+      setTourKey,
+      registerHighlightedElementRef,
+      unregisterHighlightedElementRef,
+    }
+  }, [
+    eventEmitter,
+    registerStep,
+    unregisterStep,
+    getCurrentStep,
+    start,
+    stop,
+    canStart,
+    setTourKey,
+    registerHighlightedElementRef,
+    unregisterHighlightedElementRef,
+  ])
+
   return (
     <View style={[styles.container, wrapperStyle]}>
-      <TourGuideContext.Provider
-        value={{
-          eventEmitter,
-          registerStep,
-          unregisterStep,
-          getCurrentStep,
-          start,
-          stop,
-          canStart,
-          setTourKey,
-          registerHighlightedElementRef,
-          unregisterHighlightedElementRef,
-        }}
-      >
+      <TourGuideContext.Provider value={contextValue}>
         {children}
         <Modal
           ref={modal}
@@ -427,32 +425,6 @@ export const TourGuideProvider = ({
             highlightedElementRef: highlightedElementRef[tourKey],
           }}
         />
-        {/* DEBUG: Logging de highlightedElementRef para LeaderLine */}
-        {(() => {
-          const currentRef = highlightedElementRef[tourKey]
-          console.log(
-            '🏹 TourGuideProvider: Pasando highlightedElementRef al Modal',
-          )
-          console.log('🏹 TourGuideProvider: tourKey:', tourKey)
-          console.log(
-            '🏹 TourGuideProvider: highlightedElementRef existe:',
-            !!currentRef,
-          )
-          console.log(
-            '🏹 TourGuideProvider: highlightedElementRef.current existe:',
-            !!currentRef?.current,
-          )
-          if (currentRef?.current) {
-            console.log(
-              '🏹 TourGuideProvider: ✅ Elemento ref disponible para LeaderLine',
-            )
-          } else {
-            console.log(
-              '🏹 TourGuideProvider: ❌ Elemento ref NO disponible para LeaderLine',
-            )
-          }
-          return null
-        })()}
       </TourGuideContext.Provider>
     </View>
   )

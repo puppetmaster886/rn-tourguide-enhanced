@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
-import { BorderRadiusObject, Shape } from '../types'
+import { BorderRadiusObject, Shape, TooltipPosition } from '../types'
 import { TourGuideZone } from './TourGuideZone'
 
 export interface TourGuideZoneByPositionProps {
@@ -18,6 +18,7 @@ export interface TourGuideZoneByPositionProps {
   containerStyle?: StyleProp<ViewStyle>
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
+  tooltipPosition?: TooltipPosition
   text?: string
 }
 
@@ -35,6 +36,7 @@ export const TourGuideZoneByPosition = ({
   containerStyle,
   keepTooltipPosition,
   tooltipBottomOffset,
+  tooltipPosition,
   borderRadiusObject,
   text,
 }: TourGuideZoneByPositionProps) => {
@@ -55,17 +57,18 @@ export const TourGuideZoneByPosition = ({
           shape,
           keepTooltipPosition,
           tooltipBottomOffset,
+          tooltipPosition,
           borderRadiusObject,
           text,
         }}
         style={{
           position: 'absolute',
-          height,
-          width,
-          top,
-          right,
-          bottom,
-          left,
+          height: height as any,
+          width: width as any,
+          top: top as any,
+          right: right as any,
+          bottom: bottom as any,
+          left: left as any,
         }}
       />
     </View>

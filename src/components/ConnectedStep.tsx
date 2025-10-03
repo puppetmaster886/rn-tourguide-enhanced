@@ -64,21 +64,18 @@ export class ConnectedStep extends React.Component<Props> {
 
   register() {
     if (this.props.context && this.props.context.registerStep) {
-      this.props.context.registerStep(this.props.tourKey, {
+      const stepData = {
         target: this,
         wrapper: this.wrapper,
         ...this.props,
-      })
-    } else {
-      console.warn('context undefined')
+      }
+      this.props.context.registerStep(this.props.tourKey, stepData)
     }
   }
 
   unregister() {
     if (this.props.context && this.props.context.unregisterStep) {
       this.props.context.unregisterStep(this.props.tourKey, this.props.name)
-    } else {
-      console.warn('unregisterStep undefined')
     }
   }
 
@@ -129,13 +126,16 @@ export class ConnectedStep extends React.Component<Props> {
               height: number,
               x: number,
               y: number,
-            ) =>
-              resolve({
+            ) => {
+              const result = {
                 x: borderRadius ? x + borderRadius : x,
                 y,
                 width: borderRadius ? width - borderRadius * 2 : width,
                 height,
-              }),
+              }
+
+              resolve(result)
+            },
             reject,
           )
         } else {

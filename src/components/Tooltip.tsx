@@ -14,6 +14,26 @@ export interface TooltipProps {
   handlePrev?: () => void
   handleStop?: () => void
   leaderLineConfig?: LeaderLineConfig
+  /**
+   * Optional ref for custom tooltips to specify the exact connection point for LeaderLine.
+   * If not provided, the LeaderLine will connect to the tooltip container's edge.
+   * Use this when your custom tooltip has padding and you want the line to connect
+   * to the inner content instead of the outer container.
+   *
+   * @example
+   * ```tsx
+   * function CustomTooltip({ connectionRef, ...props }: TooltipProps) {
+   *   return (
+   *     <View style={{ padding: 20 }}>
+   *       <View ref={connectionRef}> {/* LeaderLine connects here *\/}
+   *         <Text>{props.currentStep.text}</Text>
+   *       </View>
+   *     </View>
+   *   )
+   * }
+   * ```
+   */
+  connectionRef?: React.RefObject<View>
 }
 
 export const Tooltip = ({
@@ -25,11 +45,6 @@ export const Tooltip = ({
   currentStep,
   labels,
 }: TooltipProps) => {
-  console.log(
-    '🏹 Tooltip: componente renderizado para step:',
-    currentStep?.name || 'no-name',
-  )
-
   const tooltipElement = (
     <View
       style={{
@@ -71,6 +86,5 @@ export const Tooltip = ({
     </View>
   )
 
-  console.log('🏹 Tooltip: elemento creado, retornando')
   return tooltipElement
 }

@@ -3,6 +3,12 @@ import renderer from 'react-test-renderer'
 import { TourGuideProvider } from './TourGuideProvider'
 import { TourGuideZone } from './TourGuideZone'
 
+// Mock react-native-leader-line
+jest.mock('react-native-leader-line', () => ({
+  createLeaderLine: jest.fn(),
+  LeaderLine: jest.fn(),
+}))
+
 // Mock react-native-svg
 jest.mock('react-native-svg', () => ({
   Svg: 'Svg',

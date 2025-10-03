@@ -18,46 +18,23 @@ import {
   MaskOffset,
   ValueXY,
 } from '../types'
-import styles, { MARGIN, LEADER_LINE_Z_INDEX, TOOLTIP_Z_INDEX } from './style'
+import styles, { MARGIN, TOOLTIP_Z_INDEX } from './style'
 import { SvgMask } from './SvgMask'
 import { Tooltip, TooltipProps } from './Tooltip'
 
 declare var __TEST__: boolean
 
 // Import official types and components from react-native-leader-line
-import type { PlugType } from 'react-native-leader-line'
-import { LeaderLineClass, createLeaderLine } from 'react-native-leader-line'
+import type {
+  PlugType,
+  SocketPosition,
+  PathType,
+} from 'react-native-leader-line'
+import { LeaderLine as OriginalLeaderLine } from 'react-native-leader-line'
 
-// DEBUGGING VERSION - NUEVA ESTRATEGIA Z-INDEX SVG CONTEXT FIX
-const DEBUG_VERSION = 'v2.5.0-ZINDEX-SVG-FIX'
-
-// Verificar que LeaderLine está disponible y logging inicial
-console.log(`🎯 ===== MODAL VERSION ${DEBUG_VERSION} LOADED ===== 🎯`)
-console.log(
-  `🏹 Modal: [${DEBUG_VERSION}] LeaderLineClass type:`,
-  typeof LeaderLineClass,
-)
-console.log(
-  `🏹 Modal: [${DEBUG_VERSION}] createLeaderLine type:`,
-  typeof createLeaderLine,
-)
-
-try {
-  if (typeof createLeaderLine === 'function') {
-    console.log(
-      `🏹 Modal: [${DEBUG_VERSION}] ✅ createLeaderLine está disponible como función`,
-    )
-  } else {
-    console.error(
-      `🏹 Modal: [${DEBUG_VERSION}] ❌ createLeaderLine NO es una función, tipo:`,
-      typeof createLeaderLine,
-    )
-  }
-} catch (error) {
-  console.error(
-    `🏹 Modal: [${DEBUG_VERSION}] ❌ Error al verificar createLeaderLine:`,
-    error,
-  )
+// Wrapper para LeaderLine
+const LeaderLine: React.FC<any> = (props) => {
+  return React.createElement(OriginalLeaderLine, props)
 }
 
 declare var __TEST__: boolean
@@ -107,6 +84,8 @@ interface State {
   tooltipTranslateY: Animated.Value
   opacity: Animated.Value
   currentStep?: IStep
+  tooltipLayoutReady: boolean
+  highlightedAreaLayoutReady: boolean
 }
 
 interface Move {
@@ -131,7 +110,10 @@ export class Modal extends React.Component<ModalProps, State> {
 
   layout?: Layout
   private tooltipRef = React.createRef<View>()
-  private leaderLineInstance: any = null
+  private tooltipContentRef = React.createRef<View>() // Ref para el contenido interno sin padding
+  private customTooltipConnectionRef = React.createRef<View>() // Ref opcional para tooltips custom
+  private containerRef = React.createRef<View>()
+  private highlightedAreaRef = React.createRef<View>()
 
   state = {
     isFirstStep: this.props.isFirstStep,
@@ -144,6 +126,8 @@ export class Modal extends React.Component<ModalProps, State> {
     size: undefined,
     position: undefined,
     currentStep: undefined,
+    tooltipLayoutReady: false,
+    highlightedAreaLayoutReady: false,
   }
 
   constructor(props: ModalProps) {
@@ -151,45 +135,61 @@ export class Modal extends React.Component<ModalProps, State> {
   }
 
   componentDidUpdate(prevProps: ModalProps) {
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] componentDidUpdate() llamado`)
-    console.log(
-      `🏹 Modal: [${DEBUG_VERSION}] visible cambió de`,
-      prevProps.visible,
-      'a',
-      this.props.visible,
-    )
-
     if (prevProps.visible === true && this.props.visible === false) {
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] Modal se ocultó, ejecutando reset...`)
       this.reset()
     }
 
-    // Z-INDEX FIX: Usar !prevProps.visible en lugar de prevProps.visible === false
-    if (!prevProps.visible && this.props.visible === true) {
-      console.log(
-        `🏹 Modal: [${DEBUG_VERSION}] Modal se hizo visible, creando LeaderLine con delay...`,
-      )
-      setTimeout(() => {
-        console.log(
-          `🏹 Modal: [${DEBUG_VERSION}] 🕐 Creando LeaderLine después de delay para renderizado completo...`,
-        )
-        this.createLeaderLine()
-      }, 400)
+    // Reset tooltip layout ready flag when step changes
+    if (prevProps.currentStep !== this.props.currentStep) {
+      this.setState({
+        tooltipLayoutReady: false,
+        highlightedAreaLayoutReady: false,
+      })
     }
 
-    if (
-      prevProps.currentStep !== this.props.currentStep &&
-      this.props.visible
-    ) {
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] Paso cambió y modal es visible, recreando LeaderLine...`)
-      setTimeout(() => {
-        this.createLeaderLine()
-      }, 200)
-    }
+    // With Functional Component API, LeaderLine updates automatically via props
+    // No manual recreation needed
   }
 
   handleLayoutChange = ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
     this.layout = layout
+  }
+
+  handleTooltipLayout = ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+    if (
+      !this.state.tooltipLayoutReady &&
+      layout.width > 0 &&
+      layout.height > 0
+    ) {
+      // Same delay strategy for consistency
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            this.setState({ tooltipLayoutReady: true })
+          }, 50)
+        })
+      })
+    }
+  }
+
+  handleHighlightedAreaLayout = ({
+    nativeEvent: { layout },
+  }: LayoutChangeEvent) => {
+    if (
+      !this.state.highlightedAreaLayoutReady &&
+      layout.width > 0 &&
+      layout.height > 0
+    ) {
+      // Add extra delay to ensure refs are fully measurable by LeaderLine
+      // Using double RAF + small timeout for better stability
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            this.setState({ highlightedAreaLayoutReady: true })
+          }, 50)
+        })
+      })
+    }
   }
 
   measure(): Promise<Layout> {
@@ -216,6 +216,19 @@ export class Modal extends React.Component<ModalProps, State> {
     })
   }
 
+  // Helper function to check if two rectangles overlap
+  checkOverlap(
+    rect1: { left: number; top: number; right: number; bottom: number },
+    rect2: { left: number; top: number; right: number; bottom: number },
+  ): boolean {
+    return !(
+      rect1.right < rect2.left ||
+      rect1.left > rect2.right ||
+      rect1.bottom < rect2.top ||
+      rect1.top > rect2.bottom
+    )
+  }
+
   async _animateMove(
     obj: Move = {
       top: 0,
@@ -225,23 +238,20 @@ export class Modal extends React.Component<ModalProps, State> {
     },
   ) {
     const layout = await this.measure()
+
     if (!this.props.androidStatusBarVisible && Platform.OS === 'android') {
       obj.top -= StatusBar.currentHeight || 30
     }
 
-    const center = {
-      x: obj.left! + obj.width! / 2,
-      y: obj.top! + obj.height! / 2,
-    }
+    // Estimated tooltip dimensions (width: 80% of screen from Tooltip.tsx, height: estimated)
+    const TOOLTIP_HEIGHT = 135
+    const tooltipWidth = layout.width! * 0.8
+    const tooltipHeight =
+      TOOLTIP_HEIGHT + (this.props.currentStep?.tooltipBottomOffset || 0)
 
-    const relativeToLeft = center.x
-    const relativeToTop = center.y
-    const relativeToBottom = Math.abs(center.y - layout.height!)
-    const relativeToRight = Math.abs(center.x - layout.width!)
-
-    const verticalPosition = relativeToBottom > relativeToTop ? 'bottom' : 'top'
-    const horizontalPosition =
-      relativeToLeft > relativeToRight ? 'left' : 'right'
+    // Calculate centered position
+    const centeredLeft = (layout.width! - tooltipWidth) / 2
+    const centeredTop = (layout.height! - tooltipHeight) / 2
 
     const tooltip = {
       top: 0,
@@ -252,23 +262,45 @@ export class Modal extends React.Component<ModalProps, State> {
       left: 0,
     }
 
-    if (verticalPosition === 'bottom') {
-      tooltip.top = obj.top + obj.height + MARGIN
-    } else {
-      tooltip.bottom = layout.height! - (obj.top - MARGIN)
-    }
-
-    // Apply custom tooltipLeftOffset if provided
+    // Determine positioning strategy
+    const tooltipPosition = this.props.currentStep?.tooltipPosition || 'relative'
     const customLeftOffset = this.props.currentStep?.tooltipLeftOffset
 
+    // Custom left offset takes precedence over all positioning strategies
     if (customLeftOffset !== undefined) {
-      // When tooltipLeftOffset is provided, use it directly
       tooltip.left = customLeftOffset
       tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
-      // Clear right positioning when using custom left
       tooltip.right = 0
-    } else {
-      // Original logic when no custom left offset is provided
+      tooltip.top = centeredTop
+    } else if (tooltipPosition === 'centered') {
+      // Always center the tooltip
+      tooltip.left = centeredLeft
+      tooltip.maxWidth = tooltipWidth
+      tooltip.right = 0
+      tooltip.top = centeredTop
+    } else if (tooltipPosition === 'relative') {
+      // Always use relative positioning (original rn-tourguide behavior)
+      const center = {
+        x: obj.left! + obj.width! / 2,
+        y: obj.top! + obj.height! / 2,
+      }
+
+      const relativeToLeft = center.x
+      const relativeToTop = center.y
+      const relativeToBottom = Math.abs(center.y - layout.height!)
+      const relativeToRight = Math.abs(center.x - layout.width!)
+
+      const verticalPosition =
+        relativeToBottom > relativeToTop ? 'bottom' : 'top'
+      const horizontalPosition =
+        relativeToLeft > relativeToRight ? 'left' : 'right'
+
+      if (verticalPosition === 'bottom') {
+        tooltip.top = obj.top + obj.height + MARGIN
+      } else {
+        tooltip.bottom = layout.height! - (obj.top - MARGIN)
+      }
+
       if (horizontalPosition === 'left') {
         tooltip.right = Math.max(layout.width! - (obj.left + obj.width), 0)
         tooltip.right =
@@ -279,16 +311,95 @@ export class Modal extends React.Component<ModalProps, State> {
         tooltip.left = tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
         tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
       }
+    } else {
+      // 'auto': center if no overlap, relative if overlap
+      const centeredTooltipRect = {
+        left: centeredLeft,
+        top: centeredTop,
+        right: centeredLeft + tooltipWidth,
+        bottom: centeredTop + tooltipHeight,
+      }
+
+      const highlightedRect = {
+        left: obj.left,
+        top: obj.top,
+        right: obj.left + obj.width,
+        bottom: obj.top + obj.height,
+      }
+
+      const hasOverlap = this.checkOverlap(centeredTooltipRect, highlightedRect)
+
+      if (!hasOverlap) {
+        // No overlap: use centered position
+        tooltip.left = centeredLeft
+        tooltip.maxWidth = tooltipWidth
+        tooltip.right = 0
+        tooltip.top = centeredTop
+      } else {
+        // Overlap detected: use position relative to highlighted element
+        const center = {
+          x: obj.left! + obj.width! / 2,
+          y: obj.top! + obj.height! / 2,
+        }
+
+        const relativeToLeft = center.x
+        const relativeToTop = center.y
+        const relativeToBottom = Math.abs(center.y - layout.height!)
+        const relativeToRight = Math.abs(center.x - layout.width!)
+
+        const verticalPosition =
+          relativeToBottom > relativeToTop ? 'bottom' : 'top'
+        const horizontalPosition =
+          relativeToLeft > relativeToRight ? 'left' : 'right'
+
+        if (verticalPosition === 'bottom') {
+          tooltip.top = obj.top + obj.height + MARGIN
+        } else {
+          tooltip.bottom = layout.height! - (obj.top - MARGIN)
+        }
+
+        if (horizontalPosition === 'left') {
+          tooltip.right = Math.max(layout.width! - (obj.left + obj.width), 0)
+          tooltip.right =
+            tooltip.right === 0 ? tooltip.right + MARGIN : tooltip.right
+          tooltip.maxWidth = layout.width! - tooltip.right - MARGIN
+        } else {
+          tooltip.left = Math.max(obj.left, 0)
+          tooltip.left = tooltip.left === 0 ? tooltip.left + MARGIN : tooltip.left
+          tooltip.maxWidth = layout.width! - tooltip.left - MARGIN
+        }
+      }
     }
 
     const duration = this.props.animationDuration! + 200
-    const toValue =
-      verticalPosition === 'bottom'
-        ? tooltip.top
-        : obj.top -
-          MARGIN -
-          135 -
-          (this.props.currentStep?.tooltipBottomOffset || 0)
+    // Calculate toValue based on positioning strategy
+    let toValue: number
+
+    // When using centered mode or custom offset, use tooltip.top directly
+    if (customLeftOffset !== undefined || tooltipPosition === 'centered') {
+      toValue = tooltip.top
+    } else if (tooltipPosition === 'relative' || tooltipPosition === 'auto') {
+      // For relative or auto modes, calculate based on element position
+      const center = {
+        x: obj.left! + obj.width! / 2,
+        y: obj.top! + obj.height! / 2,
+      }
+      const relativeToTop = center.y
+      const relativeToBottom = Math.abs(center.y - layout.height!)
+      const verticalPosition =
+        relativeToBottom > relativeToTop ? 'bottom' : 'top'
+
+      toValue =
+        verticalPosition === 'bottom'
+          ? tooltip.top
+          : obj.top -
+            MARGIN -
+            135 -
+            (this.props.currentStep?.tooltipBottomOffset || 0)
+    } else {
+      // Fallback to tooltip.top
+      toValue = tooltip.top
+    }
     const translateAnim = Animated.timing(this.state.tooltipTranslateY, {
       toValue,
       duration,
@@ -358,205 +469,22 @@ export class Modal extends React.Component<ModalProps, State> {
   }
 
   reset() {
-    this.cleanupLeaderLine()
     this.setState({
       containerVisible: false,
       layout: undefined,
     })
   }
 
-  // Z-INDEX STRATEGY: LeaderLine methods with proper z-index configuration
-  private createLeaderLine = () => {
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] createLeaderLine() llamado`)
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] ⚡ INICIO DE CREACIÓN DE LEADERLINE ⚡`)
-
-    try {
-      this.cleanupLeaderLine()
-
-      const config = this.getLeaderLineConfig()
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine config:`, config)
-
-      if (!config.enabled) {
-        console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine deshabilitado (config.enabled=false)`)
-        return
-      }
-
-      const hasTooltipRef = !!this.tooltipRef.current
-      const hasElementRef = !!this.props.highlightedElementRef?.current
-
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] Refs disponibles:`, {
-        tooltipRef: hasTooltipRef,
-        highlightedElementRef: hasElementRef,
-      })
-
-      if (!hasTooltipRef || !hasElementRef) {
-        console.log(`🏹 Modal: [${DEBUG_VERSION}] Refs no disponibles, reintentando en 100ms...`)
-        setTimeout(() => {
-          this.createLeaderLine()
-        }, 100)
-        return
-      }
-
-      const sourceElement = this.props.highlightedElementRef!.current
-      const targetElement = this.tooltipRef.current
-
-      if (sourceElement && targetElement) {
-        sourceElement.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] 📍 Elemento origen posición:`, { x, y, width, height, pageX, pageY })
-        })
-        targetElement.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] 📍 Elemento destino posición:`, { x, y, width, height, pageX, pageY })
-        })
-      }
-
-      const { enabled, ...leaderLineOptions } = config
-
-      // Z-INDEX CRITICAL: Configurar z-index para LeaderLine SVG
-      const leaderLineOptionsWithZIndex = {
-        ...leaderLineOptions,
-        // Agregar configuración específica para React Native
-        zIndex: LEADER_LINE_Z_INDEX, // 10000 - por encima del backdrop (9999) pero debajo del tooltip (10001)
-        elevation: LEADER_LINE_Z_INDEX, // Para Android
-        // Configuración adicional para forzar rendering
-        svgStyle: {
-          zIndex: LEADER_LINE_Z_INDEX,
-          elevation: LEADER_LINE_Z_INDEX,
-          position: 'absolute',
-        }
-      }
-
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] Creando LeaderLine con opciones Z-INDEX:`, leaderLineOptionsWithZIndex)
-
-      this.leaderLineInstance = createLeaderLine(
-        this.props.highlightedElementRef!.current!,
-        this.tooltipRef.current!,
-        leaderLineOptionsWithZIndex
-      )
-
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine creado exitosamente:`, !!this.leaderLineInstance)
-      console.log(`🎯 ===== LEADERLINE CREATION STATUS: ${!!this.leaderLineInstance ? 'SUCCESS' : 'FAILED'} [${DEBUG_VERSION}] ===== 🎯`)
-
-      if (this.leaderLineInstance) {
-        this.forceLeaderLineVisibility()
-        
-        // Z-INDEX POST-PROCESAMIENTO: Intentar manipular el SVG después de la creación
-        setTimeout(() => {
-          this.applyZIndexPostProcessing()
-        }, 100)
-      }
-    } catch (error) {
-      console.error(`🏹 Modal: [${DEBUG_VERSION}] Error al crear LeaderLine:`, error)
-    }
-  }
-
-  private forceLeaderLineVisibility = () => {
-    if (!this.leaderLineInstance) return
-
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🚀 FORZANDO VISIBILIDAD DE LEADERLINE...`)
-
-    // Strategy 1: Show inmediato
-    try {
-      this.leaderLineInstance.show?.()
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show inmediato ejecutado`)
-    } catch (error) {
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en show inmediato:`, error)
-    }
-
-    // Strategy 2: Múltiples intentos con delays
-    const delays = [50, 100, 200, 500, 1000]
-    delays.forEach((delay) => {
-      setTimeout(() => {
-        try {
-          this.leaderLineInstance?.show?.()
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show ejecutado después de ${delay}ms`)
-        } catch (error) {
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en show después de ${delay}ms:`, error)
-        }
-      }, delay)
-    })
-
-    // Strategy 3: Force position update + show final
-    setTimeout(() => {
-      try {
-        const instance = this.leaderLineInstance
-        if (instance.position) {
-          instance.position()
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Position() forzado`)
-        }
-        if (instance.show) {
-          instance.show()
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Show final después de position()`)
-        }
-      } catch (error) {
-        console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error forzando position:`, error)
-      }
-    }, 600)
-  }
-
-  private applyZIndexPostProcessing = () => {
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 Aplicando post-procesamiento Z-INDEX...`)
-    
-    try {
-      // Intentar acceder al SVG del LeaderLine y aplicar z-index
-      if (this.leaderLineInstance && typeof this.leaderLineInstance === 'object') {
-        const instance = this.leaderLineInstance
-        
-        // Buscar el componente SVG en las propiedades del LeaderLine
-        const svgElement = instance.component || instance.svg || instance._svg
-        
-        if (svgElement) {
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 SVG encontrado, aplicando z-index...`)
-          
-          // Aplicar estilos z-index al SVG
-          if (svgElement.style) {
-            svgElement.style.zIndex = LEADER_LINE_Z_INDEX.toString()
-            svgElement.style.elevation = LEADER_LINE_Z_INDEX.toString()
-            svgElement.style.position = 'absolute'
-            console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Z-index aplicado al SVG: ${LEADER_LINE_Z_INDEX}`)
-          }
-          
-          // También intentar con propiedades React Native
-          if (svgElement.props) {
-            svgElement.props = {
-              ...svgElement.props,
-              style: {
-                ...svgElement.props.style,
-                zIndex: LEADER_LINE_Z_INDEX,
-                elevation: LEADER_LINE_Z_INDEX,
-              }
-            }
-            console.log(`🏹 Modal: [${DEBUG_VERSION}] ✅ Z-index aplicado a props del SVG`)
-          }
-        } else {
-          console.log(`🏹 Modal: [${DEBUG_VERSION}] ⚠️ SVG no encontrado en LeaderLine instance`)
-        }
-      }
-    } catch (error) {
-      console.log(`🏹 Modal: [${DEBUG_VERSION}] ❌ Error en post-procesamiento Z-INDEX:`, error)
-    }
-  }
-
-  private cleanupLeaderLine = () => {
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] cleanupLeaderLine() llamado`)
-    if (this.leaderLineInstance) {
-      try {
-        console.log(`🏹 Modal: [${DEBUG_VERSION}] Limpiando LeaderLine existente...`)
-        this.leaderLineInstance.remove()
-        console.log(`🏹 Modal: [${DEBUG_VERSION}] LeaderLine removido exitosamente`)
-      } catch (error) {
-        console.error(`🏹 Modal: [${DEBUG_VERSION}] Error al limpiar LeaderLine:`, error)
-      }
-      this.leaderLineInstance = null
-    }
-  }
-
   private getLeaderLineConfig = (): LeaderLineConfig & { enabled: boolean } => {
     const defaults = {
       enabled: true,
-      color: '#FF6B6B', // Rojo brillante para mejor visibilidad
-      size: 4,          // Grosor aumentado
-      startPlug: 'disc' as PlugType,
+      startSocket: 'auto' as SocketPosition,
+      endSocket: 'auto' as SocketPosition,
+      color: 'white',
+      size: 4,
       endPlug: 'arrow1' as PlugType,
+      endPlugColor: 'white',
+      path: 'straight' as PathType,
     }
 
     const stepConfig = this.props.currentStep?.leaderLineConfig
@@ -568,8 +496,95 @@ export class Modal extends React.Component<ModalProps, State> {
       ...stepConfig,
     }
 
-    console.log(`🏹 Modal: [${DEBUG_VERSION}] 🎨 Configuración final de LeaderLine:`, finalConfig)
     return finalConfig
+  }
+
+  renderHighlightedArea() {
+    const { visible } = this.props
+    const { position, size } = this.state
+
+    if (!visible || !position || !size) {
+      return null
+    }
+
+    // CRITICAL FIX: Force re-mount on step change to ensure onLayout is always called
+    const highlightedKey = `highlighted-${this.props.currentStep?.name || 'none'}`
+
+    // View invisible posicionado en el área destacada para servir como referencia de LeaderLine
+    return (
+      <View
+        ref={this.highlightedAreaRef}
+        collapsable={false}
+        key={highlightedKey}
+        style={{
+          position: 'absolute',
+          left: (position as ValueXY).x,
+          top: (position as ValueXY).y,
+          width: (size as ValueXY).x,
+          height: (size as ValueXY).y,
+          backgroundColor: 'transparent',
+        }}
+        pointerEvents='none'
+        onLayout={this.handleHighlightedAreaLayout}
+      />
+    )
+  }
+
+  renderLeaderLine() {
+    const { visible } = this.props
+
+    if (!visible) {
+      return null
+    }
+
+    const config = this.getLeaderLineConfig()
+
+    if (!config.enabled) {
+      return null
+    }
+
+    // Wait for both tooltip and highlighted area layouts to be ready
+    if (!this.state.tooltipLayoutReady) {
+      return null
+    }
+
+    if (!this.state.highlightedAreaLayoutReady) {
+      return null
+    }
+
+    // Detect if using custom tooltip
+    const isCustomTooltip = this.props.tooltipComponent !== Tooltip
+    let tooltipConnectionRef: React.RefObject<View>
+
+    if (isCustomTooltip) {
+      // Custom tooltip MUST provide connectionRef
+      if (!this.customTooltipConnectionRef.current) {
+        return null
+      }
+      tooltipConnectionRef = this.customTooltipConnectionRef
+    } else {
+      // Default tooltip uses internal tooltipContentRef
+      tooltipConnectionRef = this.tooltipContentRef
+    }
+
+    const hasTooltipRef = !!tooltipConnectionRef.current
+    const hasHighlightedAreaRef = !!this.highlightedAreaRef.current
+
+    if (!hasTooltipRef || !hasHighlightedAreaRef) {
+      return null
+    }
+
+    const { enabled, ...leaderLineOptions } = config
+
+    return (
+      <LeaderLine
+        start={{ element: tooltipConnectionRef }}
+        end={{ element: this.highlightedAreaRef }}
+        containerRef={this.containerRef}
+        {...leaderLineOptions}
+        strokeWidth={leaderLineOptions.size || 4}
+      />
+    )
   }
 
   handleNext = () => {
@@ -621,11 +636,14 @@ export class Modal extends React.Component<ModalProps, State> {
         }
       : {}
 
+    // CRITICAL FIX: Force re-mount on step change to ensure onLayout is always called
+    const tooltipKey = `tooltip-${this.props.currentStep?.name || 'none'}`
+
     return (
       <Animated.View
         ref={this.tooltipRef}
         pointerEvents='box-none'
-        key='tooltip'
+        key={tooltipKey}
         style={[
           styles.tooltip,
           this.props.tooltipStyle,
@@ -638,15 +656,23 @@ export class Modal extends React.Component<ModalProps, State> {
           },
         ]}
       >
-        <TooltipComponent
-          isFirstStep={this.state.isFirstStep}
-          isLastStep={this.state.isLastStep}
-          currentStep={this.state.currentStep!}
-          handleNext={this.handleNext}
-          handlePrev={this.handlePrev}
-          handleStop={this.handleStop}
-          labels={this.props.labels}
-        />
+        <View
+          ref={this.tooltipContentRef}
+          collapsable={false}
+          style={{ width: '100%' }}
+          onLayout={this.handleTooltipLayout}
+        >
+          <TooltipComponent
+            isFirstStep={this.state.isFirstStep}
+            isLastStep={this.state.isLastStep}
+            currentStep={this.state.currentStep!}
+            handleNext={this.handleNext}
+            handlePrev={this.handlePrev}
+            handleStop={this.handleStop}
+            labels={this.props.labels}
+            connectionRef={this.customTooltipConnectionRef}
+          />
+        </View>
       </Animated.View>
     )
   }
@@ -667,6 +693,7 @@ export class Modal extends React.Component<ModalProps, State> {
     }
     return (
       <View
+        ref={this.containerRef}
         style={[StyleSheet.absoluteFill, { backgroundColor: 'transparent' }]}
         pointerEvents='box-none'
       >
@@ -678,8 +705,10 @@ export class Modal extends React.Component<ModalProps, State> {
           {contentVisible && (
             <>
               {this.renderMask()}
+              {this.renderHighlightedArea()}
               {this.renderNonInteractionPlaceholder()}
               {this.renderTooltip()}
+              {this.renderLeaderLine()}
             </>
           )}
         </View>

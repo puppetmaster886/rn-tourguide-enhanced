@@ -6,7 +6,7 @@
     "strict": true,
     "removeComments": true,
     "jsx": "react",
-    "target": "es2019",
+    "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -30,8 +30,7 @@
     "noFallthroughCasesInSwitch": true,
     "strictPropertyInitialization": false,
     "lib": ["dom", "esnext"],
-    "typeRoots": ["./node_modules/@types", "./@types"]
+    "typeRoots": ["./node_modules/@types", "./@types", "./src/types"]
   },
-  "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.test.tsx"],
-  "extends": "expo/tsconfig.base"
+  "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }

@@ -69,9 +69,9 @@ const AppContent = () => {
 
   React.useEffect(() => {
     if (eventEmitter) {
-      const startHandler = () => console.log('Main tour started')
-      const stopHandler = () => console.log('Main tour stopped')
-      const stepChangeHandler = () => console.log('Main tour stepChange')
+      const startHandler = () => {}
+      const stopHandler = () => {}
+      const stepChangeHandler = () => {}
 
       eventEmitter.on('start', startHandler)
       eventEmitter.on('stop', stopHandler)
@@ -87,9 +87,9 @@ const AppContent = () => {
 
   React.useEffect(() => {
     if (eventEmitterAdvanced) {
-      const startHandler = () => console.log('Advanced tour started')
-      const stopHandler = () => console.log('Advanced tour stopped')
-      const stepChangeHandler = () => console.log('Advanced tour stepChange')
+      const startHandler = () => {}
+      const stopHandler = () => {}
+      const stepChangeHandler = () => {}
 
       eventEmitterAdvanced.on('start', startHandler)
       eventEmitterAdvanced.on('stop', stopHandler)

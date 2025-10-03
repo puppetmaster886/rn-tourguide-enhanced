@@ -49,7 +49,140 @@ If you are using Expo:
 expo install react-native-svg
 ```
 
-## Usage
+## Development
+
+### Building the Library
+
+To build the library from source:
+
+```bash
+# Install dependencies
+yarn install
+
+# Build the TypeScript library
+yarn build
+```
+
+This will compile the TypeScript source files from `src/` into JavaScript files in `lib/`.
+
+### Testing with the Example App
+
+The repository includes a complete React Native example app for testing:
+
+```bash
+# Navigate to example app
+cd example-app
+
+# Install dependencies
+npm install
+
+# Start Metro bundler
+yarn start --reset-cache --port 8086
+
+# In another terminal, run on Android
+npx react-native run-android --port=8086
+
+# Or run on iOS
+npx react-native run-ios --port=8086
+```
+
+### Running Unit Tests
+
+To run the library's unit tests:
+
+```bash
+# Run tests once
+yarn test
+
+# Run tests in watch mode
+yarn test --watch
+
+# Run tests with coverage
+yarn test --coverage
+```
+
+### Linting and Type Checking
+
+```bash
+# Run ESLint
+yarn lint
+
+# Fix linting issues automatically
+yarn lint --fix
+
+# Type checking with TypeScript
+yarn tsc
+
+# Build and verify everything
+yarn verify
+```
+
+### Development Workflow
+
+When making changes to the library source code:
+
+1. **Edit source files** in `src/` directory
+2. **Rebuild the library**:
+   ```bash
+   yarn build
+   ```
+3. **Reload the example app** by pressing `r` in Metro or restarting the app
+
+### Metro Configuration
+
+The example app is configured with Metro to:
+
+- Watch the parent directory for library changes
+- Resolve React dependencies correctly to avoid multiple React instances
+- Support TypeScript and JSX files
+
+### Project Structure
+
+```
+rn-tourguide-enhanced/
+├── src/                    # Library source code (TypeScript)
+├── lib/                    # Compiled library output (JavaScript)
+└── example-app/           # React Native test application
+```
+
+### Requirements
+
+- **Node.js**: >= 18 (see `.nvmrc`)
+- **React Native**: >= 0.70.0
+- **React**: >= 18.0.0
+- **react-native-svg**: >= 12.0.0
+
+### Troubleshooting
+
+**"Invalid hook call" errors:**
+
+- Make sure you rebuild the library after changing source code
+- Verify Metro is using the correct React instance via aliases
+
+**Module resolution errors:**
+
+- Restart Metro with `--reset-cache`
+- Check that `lib/` directory exists and contains compiled files
+
+### Publishing the Library
+
+To prepare the library for publication:
+
+```bash
+# This runs tests, linting, type checking, and builds the library
+yarn verify
+
+# Publish to npm (requires npm login)
+npm publish
+```
+
+The `prepublishOnly` script automatically runs `yarn verify` before publishing to ensure quality.
+
+## Contributing
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed development instructions.
+
+Issues and Pull Requests are always welcome.
 
 ```tsx
 import {
@@ -473,10 +606,6 @@ Define different mask offsets for each direction for precise highlighting:
 - **Web & Mobile**: Fixed SVG mask issues on screen resize
 - **Landscape Mode**: Improved modal positioning in landscape orientation
 - **Android**: Better StatusBar handling with `androidStatusBarVisible` prop
-
-## Contributing
-
-Issues and Pull Requests are always welcome.
 
 ## Hire an expert!
 

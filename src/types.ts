@@ -1,8 +1,14 @@
 export type Shape =
   | 'circle'
   | 'rectangle'
+  | 'ellipse'
   | 'circle_and_keep'
   | 'rectangle_and_keep'
+
+export type TooltipPosition =
+  | 'centered' // Always center the tooltip
+  | 'relative' // Always position relative to highlighted element (original rn-tourguide behavior)
+  | 'auto'     // Auto-detect: center if no overlap, relative if overlap (default)
 
 // Import official types from react-native-leader-line instead of defining our own
 import type { LeaderLineOptions } from 'react-native-leader-line'
@@ -25,6 +31,7 @@ export interface IStep {
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
+  tooltipPosition?: TooltipPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
 }

@@ -1,6 +1,3 @@
-// 🔍 DEBUG: Logs de exportación principal
-console.log('📦 rn-tourguide-enhanced: Iniciando exportaciones...')
-
 export { Modal } from './components/Modal'
 export { SvgMask } from './components/SvgMask'
 export { Tooltip } from './components/Tooltip'
@@ -15,9 +12,3 @@ export { TourGuideZoneByPosition } from './components/TourGuideZoneByPosition'
 export type { TourGuideZoneByPositionProps } from './components/TourGuideZoneByPosition'
 export { useTourGuideController } from './hooks/useTourGuideController'
 export * from './types'
-
-// 🔍 DEBUG: Verificación de exportaciones
-console.log('📦 rn-tourguide-enhanced: Exportaciones completadas')
-console.log(
-  '📦 rn-tourguide-enhanced: Componentes disponibles: Modal, SvgMask, Tooltip, TourGuideProvider, etc.',
-)

@@ -74,6 +74,13 @@ export const defaultSvgPath = ({
   borderRadius: number
   borderRadiusObject?: BorderRadiusObject
 }): SvgPath => {
+  // Validate inputs to prevent NaN
+  if (!size || !position ||
+      isNaN(size.x) || isNaN(size.y) ||
+      isNaN(position.x) || isNaN(position.y)) {
+    return 'M0,0 h 1 v 1 h -1 Z'
+  }
+
   if (radius || borderRadiusObject) {
     const borderRadiusTopRight = getBorderRadiusOrDefault(
       borderRadiusObject?.topRight,
@@ -117,6 +124,25 @@ export const circleSvgPath = ({
   size: ValueXY
   position: ValueXY
 }): SvgPath => {
+  // Validate inputs to prevent NaN
+  if (!size || !position ||
+      isNaN(size.x) || isNaN(size.y) ||
+      isNaN(position.x) || isNaN(position.y)) {
+    return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
+  }
+
+  // ⚠️ WARNING: Elementos con dimensiones 0 (como triángulos CSS)
+  if (size.x === 0 || size.y === 0) {
+    const minSize = 80
+    const radius = minSize / 2
+    return [
+      `M${position.x - minSize / 8},${position.y + minSize / 2}`,
+      `a${radius} ${radius} 0 1 0 ${radius * 2} 0 ${radius} ${radius} 0 1 0-${
+        radius * 2
+      } 0`,
+    ].join('')
+  }
+
   const radius = Math.round(Math.max(size.x, size.y) / 2)
   return [
     `M${position.x - size.x / 8},${position.y + size.y / 2}`,
@@ -126,9 +152,48 @@ export const circleSvgPath = ({
   ].join('')
 }
 
+export const ellipseSvgPath = ({
+  size,
+  position,
+}: {
+  size: ValueXY
+  position: ValueXY
+}): SvgPath => {
+  // Validate inputs to prevent NaN
+  if (!size || !position ||
+      isNaN(size.x) || isNaN(size.y) ||
+      isNaN(position.x) || isNaN(position.y)) {
+    return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
+  }
+
+  // ⚠️ WARNING: Elementos con dimensiones 0 (como triángulos CSS)
+  if (size.x === 0 || size.y === 0) {
+    const minSizeX = 100  // Ancho
+    const minSizeY = 60   // Alto
+    const radiusX = minSizeX / 2
+    const radiusY = minSizeY / 2
+    return [
+      `M${position.x - minSizeX / 8},${position.y + minSizeY / 2}`,
+      `a${radiusX} ${radiusY} 0 1 0 ${radiusX * 2} 0 ${radiusX} ${radiusY} 0 1 0-${
+        radiusX * 2
+      } 0`,
+    ].join('')
+  }
+
+  const radiusX = Math.round(size.x / 2)
+  const radiusY = Math.round(size.y / 2)
+  return [
+    `M${position.x - size.x / 8},${position.y + size.y / 2}`,
+    `a${radiusX} ${radiusY} 0 1 0 ${radiusX * 2} 0 ${radiusX} ${radiusY} 0 1 0-${
+      radiusX * 2
+    } 0`,
+  ].join('')
+}
+
 const getMaxSegmentLength = memoize((shape: Shape) => {
   switch (shape) {
     case 'circle':
+    case 'ellipse':
     case 'circle_and_keep':
       return 7
     case 'rectangle_and_keep':
@@ -171,7 +236,9 @@ const normalizeMarkOffset = (maskOffset?: MaskOffset) => {
 }
 
 const sizeOffsetEnhanced = memoize((size: ValueXY, maskOffset?: MaskOffset) => {
-  if (!maskOffset) return size
+  if (!maskOffset) {
+    return size
+  }
 
   const normalized = normalizeMarkOffset(maskOffset)
   return {
@@ -182,7 +249,9 @@ const sizeOffsetEnhanced = memoize((size: ValueXY, maskOffset?: MaskOffset) => {
 
 const positionOffsetEnhanced = memoize(
   (position: ValueXY, maskOffset?: MaskOffset) => {
-    if (!maskOffset) return position
+    if (!maskOffset) {
+      return position
+    }
 
     const normalized = normalizeMarkOffset(maskOffset)
     return {
@@ -248,9 +317,21 @@ const getInterpolatorEnhanced = memoize(
         options,
       )
 
+    const getEllipseInterpolator = () =>
+      interpolate(
+        previousPath,
+        ellipseSvgPath({
+          size: sizeOffsetEnhanced(size, maskOffset),
+          position,
+        }),
+        options,
+      )
+
     switch (shape) {
       case 'circle':
         return getCircleInterpolator()
+      case 'ellipse':
+        return getEllipseInterpolator()
       case 'rectangle':
         return getDefaultInterpolate()
       case 'circle_and_keep': {
@@ -295,24 +376,16 @@ export const svgMaskPathMorph = ({
   animation,
   to: { position, size, shape, maskOffset, borderRadius, borderRadiusObject },
 }: SVGMaskPathMorphParam) => {
-  console.log('🔧 svgMaskPathMorph: Parámetros recibidos:', {
-    previousPath: previousPath.substring(0, 50) + '...',
-    animationValue: animation._value,
-    position,
-    size,
-    shape,
-    maskOffset,
-    borderRadius,
-    borderRadiusObject,
-  })
+  // Validate position and size to prevent NaN in path
+  if (!position || !size ||
+      isNaN(position.x) || isNaN(position.y) ||
+      isNaN(size.x) || isNaN(size.y)) {
+    return previousPath
+  }
 
   // Si la animación está completa, usar la función simplificada
   const animValue = clamp(animation._value, 0, 1)
   if (animValue >= 0.99) {
-    console.log(
-      '🔧 svgMaskPathMorph: Usando función simplificada (animación completa)',
-    )
-
     // Extraer dimensiones del canvas del previousPath
     const canvasMatch = previousPath.match(
       /M0,0H(\d+(?:\.\d+)?)V(\d+(?:\.\d+)?)H0V0Z/,
@@ -329,16 +402,18 @@ export const svgMaskPathMorph = ({
         size,
         offset,
         borderRadius || 0,
+        shape,  // ⭐ CRÍTICO: Pasar el shape para que se aplique!
       )
     }
   }
 
-  console.log('🔧 svgMaskPathMorph: Usando interpolador original')
+  // Default shape to 'rectangle' if undefined
+  const safeShape = shape || 'rectangle'
 
   // Use enhanced interpolator that supports both number and object maskOffset
   const interpolator = getInterpolatorEnhanced(
     cleanPath(previousPath),
-    shape!,
+    safeShape,
     position,
     size,
     maskOffset,
@@ -346,22 +421,53 @@ export const svgMaskPathMorph = ({
     borderRadiusObject,
   )
 
-  console.log('🔧 svgMaskPathMorph: Interpolator creado')
-
   const canvasPath = getCanvasPath(previousPath)
-  console.log('🔧 svgMaskPathMorph: Canvas path:', canvasPath)
 
   const interpolatedPath = interpolator(animValue)
-  console.log(
-    '🔧 svgMaskPathMorph: Interpolated path:',
-    interpolatedPath.substring(0, 50) + '...',
-  )
 
-  const result = `${canvasPath}${interpolatedPath}`
-  console.log(
-    '🔧 svgMaskPathMorph: Resultado final:',
-    result.substring(0, 100) + '...',
-  )
+  // Validate interpolated path doesn't contain NaN
+  if (typeof interpolatedPath === 'string' && interpolatedPath.includes('NaN')) {
+    const fallbackPath = defaultSvgPath({
+      size,
+      position,
+      borderRadius: borderRadius || 0,
+      borderRadiusObject,
+    })
+    return `${canvasPath}${fallbackPath}`
+  }
+
+  // Handle array result from interpolator (for _and_keep shapes)
+  const pathString = Array.isArray(interpolatedPath)
+    ? interpolatedPath.join('')
+    : interpolatedPath
+
+  // More thorough NaN detection
+  const hasNaN = pathString.includes('NaN') ||
+                 pathString.includes(' N') ||
+                 /\sNaN|\sN[^0-9]/.test(pathString)
+
+  if (hasNaN) {
+    const fallbackPath = defaultSvgPath({
+      size,
+      position,
+      borderRadius: borderRadius || 0,
+      borderRadiusObject,
+    })
+    return `${canvasPath}${fallbackPath}`
+  }
+
+  const result = `${canvasPath}${pathString}`
+
+  // ULTRA paranoid final check
+  if (result.includes('NaN')) {
+    const fallbackPath = defaultSvgPath({
+      size,
+      position,
+      borderRadius: borderRadius || 0,
+      borderRadiusObject,
+    })
+    return `${canvasPath}${fallbackPath}`
+  }
 
   return result
 }
@@ -374,29 +480,65 @@ export const createMaskPathWithHole = (
   holeSize: ValueXY,
   maskOffset: number = 0,
   borderRadius: number = 0,
+  shape?: Shape,  // ⭐ Nuevo parámetro para soportar diferentes shapes
 ): string => {
-  console.log('🔧 createMaskPathWithHole:', {
-    canvasWidth,
-    canvasHeight,
-    holePosition,
-    holeSize,
-    maskOffset,
-    borderRadius,
-  })
+  // Validate inputs to prevent NaN in path
+  if (!holePosition || !holeSize ||
+      isNaN(holePosition.x) || isNaN(holePosition.y) ||
+      isNaN(holeSize.x) || isNaN(holeSize.y) ||
+      isNaN(canvasWidth) || isNaN(canvasHeight) ||
+      isNaN(maskOffset) || isNaN(borderRadius)) {
+    return `M0,0H${canvasWidth || 100}V${canvasHeight || 100}H0V0Z`
+  }
 
   // Calculate hole bounds with offset
-  const x = holePosition.x - maskOffset
-  const y = holePosition.y - maskOffset
-  const width = holeSize.x + maskOffset * 2
-  const height = holeSize.y + maskOffset * 2
+  let x = holePosition.x - maskOffset
+  let y = holePosition.y - maskOffset
+  let width = holeSize.x + maskOffset * 2
+  let height = holeSize.y + maskOffset * 2
 
-  console.log('🔧 Hole bounds:', { x, y, width, height })
+  // ⚠️ Para elementos con dimensiones 0 (triángulos CSS), usar tamaños mínimos
+  // Esto solo debería pasar con elementos CSS especiales, no con iconos normales
+  if (holeSize.x === 0 || holeSize.y === 0) {
+    if (shape === 'ellipse') {
+      width = 100 + maskOffset * 2
+      height = 60 + maskOffset * 2
+      x = holePosition.x - width / 2
+      y = holePosition.y - height / 2
+    } else if (shape === 'circle' || shape === 'circle_and_keep') {
+      width = 80 + maskOffset * 2
+      height = 80 + maskOffset * 2
+      x = holePosition.x - width / 2
+      y = holePosition.y - height / 2
+    }
+  }
 
   // Create path that fills entire canvas
   let path = `M0,0H${canvasWidth}V${canvasHeight}H0V0Z`
 
-  // Add hole (subtract from filled area using even-odd fill rule)
-  if (borderRadius > 0) {
+  // ⭐ NUEVO: Soportar diferentes shapes
+  if (shape === 'circle' || shape === 'circle_and_keep') {
+    // Para circle, usar el radio máximo + offset
+    const radius = Math.max(width, height) / 2
+    const centerX = x + width / 2
+    const centerY = y + height / 2
+
+    // Círculo usando arcos SVG (dos semicírculos)
+    path += `M${centerX - radius},${centerY}`
+    path += `a${radius},${radius} 0 1,0 ${radius * 2},0`
+    path += `a${radius},${radius} 0 1,0 -${radius * 2},0Z`
+  } else if (shape === 'ellipse') {
+    // Para ellipse, usar radiusX y radiusY diferentes
+    const radiusX = width / 2
+    const radiusY = height / 2
+    const centerX = x + width / 2
+    const centerY = y + height / 2
+
+    // Elipse usando arcos SVG
+    path += `M${centerX - radiusX},${centerY}`
+    path += `a${radiusX},${radiusY} 0 1,0 ${radiusX * 2},0`
+    path += `a${radiusX},${radiusY} 0 1,0 -${radiusX * 2},0Z`
+  } else if (borderRadius > 0) {
     // Rounded rectangle hole
     path += `M${x + borderRadius},${y}`
     path += `H${x + width - borderRadius}`
@@ -414,6 +556,5 @@ export const createMaskPathWithHole = (
     path += `M${x},${y}H${x + width}V${y + height}H${x}V${y}Z`
   }
 
-  console.log('🔧 Generated path:', path)
   return path
 }

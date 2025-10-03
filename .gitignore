@@ -30,8 +30,6 @@ build/Release
 
 # Xcode
 *.xcuserstate
-examples/ios/swiper.xcodeproj/project.xcworkspace/
-examples/ios/swiper.xcodeproj/xcuserdata
 
 # IntelliJ
 .idea/
@@ -43,3 +41,21 @@ jsconfig.json
 lib/
 web-build/
 
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+
+# Example app
+example-app/node_modules/
+example-app/android/build/
+example-app/android/app/build/
+example-app/android/.gradle/
+example-app/ios/build/
+example-app/ios/Pods/
+example-app/ios/.xcode.env.local
+example-app/.bundle/
+example-app/package-lock.json
+example-app/yarn.lock
+example-app/.DS_Store
+example-app/metro.config.js.bak

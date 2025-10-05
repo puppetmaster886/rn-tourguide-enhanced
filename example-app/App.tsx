@@ -10,8 +10,18 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
+// Color scheme compatible with web and native
+const Colors = {
+  darker: '#1a1a1a',
+  dark: '#3a3a3a',
+  light: '#f3f3f3',
+  lighter: '#ffffff',
+  black: '#000000',
+  white: '#ffffff',
+  primary: '#007AFF',
+};
 
 import {TourGuideProvider, TourGuideZone, useTourGuideController} from '../src';
 import type {TooltipProps} from '../src';

@@ -44,6 +44,14 @@ yarn start --reset-cache --port 8086
 
 ### Step 4: Run the Application
 
+#### For Web
+
+```bash
+yarn web
+```
+
+The app will open automatically at `http://localhost:3000`
+
 #### For Android
 
 In a new terminal:
@@ -68,8 +76,10 @@ The example app demonstrates:
 - **TourGuideZone** components wrapping UI elements
 - **useTourGuideController** hook for controlling tours
 - Multiple tour steps with different configurations
+- Custom tooltip component with connection points
 - Custom styling and positioning
 - Event handling (start, stop, step changes)
+- **Cross-platform support** - Same code runs on iOS, Android, and Web
 
 ## Usage
 
@@ -120,10 +130,21 @@ If you see "Invalid hook call" errors:
 - Verify Metro is using the correct resolver configuration
 - The Metro config includes aliases to prevent React duplication
 
-## Metro Configuration
+## Configuration
+
+### Metro (iOS/Android)
 
 The example app uses a custom Metro configuration that:
 
 - Watches the parent directory for library source changes
 - Resolves React dependencies from the example app's node_modules
 - Supports TypeScript and JSX file extensions
+
+### Webpack (Web)
+
+The web build uses webpack with:
+
+- React Native Web for cross-platform compatibility
+- Babel transpilation for modern JavaScript/TypeScript
+- Hot module replacement for fast development
+- Same `App.tsx` file as native platforms for consistency

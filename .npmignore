@@ -1,18 +1,49 @@
-App.tsx
-app.json
-babel.config.js
-metro.config.js
-app.json
-.expo
-src
-.prettierrc
+# Test files
+src/**/*.test.ts
+src/**/*.test.tsx
+__tests__/
+
+# Example apps
+example-app/
+example/
+
+# Development files
+.vscode/
+.idea/
+*.log
+.DS_Store
+*.swp
+*.swo
+
+# Build tools config
 tsconfig.json
-tslint.json
-.github
-.vscode
-yarn-error.log
-test/index.html
-.editorconfig
-*.test.js
-*.test.d.ts
-web-build
+.eslintrc.json
+.prettierrc
+babel.config.js
+jest.config.js
+
+# Documentation
+DEVELOPMENT.md
+GEMINI.md
+LEADER_LINE.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.circleci/
+
+# Editor
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

@@ -32,11 +32,11 @@ jobs:
           cache-dependency-path: example-app/package-lock.json
           
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
         
       - name: Install example-app dependencies
         working-directory: ./example-app
-        run: npm ci
+        run: npm install
         
       - name: Build for web
         working-directory: ./example-app

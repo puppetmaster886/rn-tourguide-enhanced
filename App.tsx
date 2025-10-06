@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons'
-import * as React from 'react'
+import { Ionicons } from '@expo/vector-icons';
+import * as React from 'react';
 import {
   Image,
   Platform,
@@ -8,17 +8,16 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native'
-import SimpleLeaderLineTest from './SimpleLeaderLineTest'
+} from 'react-native';
 import {
   TourGuideProvider,
   TourGuideZone,
   TourGuideZoneByPosition,
   useTourGuideController,
-} from './src'
+} from './src';
 
 const uri =
-  'https://pbs.twimg.com/profile_images/1223192265969016833/U8AX9Lfn_400x400.jpg'
+  'https://pbs.twimg.com/profile_images/1223192265969016833/U8AX9Lfn_400x400.jpg';
 
 // Add <TourGuideProvider/> at the root of you app!
 function App() {
@@ -41,72 +40,64 @@ function App() {
     >
       <AppContent />
     </TourGuideProvider>
-  )
+  );
 }
 
 const AppContent = () => {
-  const iconProps = { size: 40, color: '#888' }
-  const scrollRef = React.useRef<ScrollView>(null)
-  const [showSimpleTest, setShowSimpleTest] = React.useState(false)
+  const iconProps = { size: 40, color: '#888' };
+  const scrollRef = React.useRef<ScrollView>(null);
 
   // Main tour controller
-  const { start, canStart, stop, eventEmitter } = useTourGuideController()
+  const { start, canStart, stop, eventEmitter } = useTourGuideController();
 
   // Secondary tour controller with tourKey
   const {
     start: startAdvanced,
-    canStart: canStartAdvanced,
-    stop: stopAdvanced,
     eventEmitter: eventEmitterAdvanced,
-  } = useTourGuideController('advanced')
+  } = useTourGuideController('advanced');
 
   React.useEffect(() => {
     // start main tour at mount
     if (canStart) {
-      start(1, scrollRef)
+      start(1, scrollRef);
     }
-  }, [canStart]) // wait until everything is registered
+  }, [canStart, start, scrollRef]); // wait until everything is registered
 
   React.useEffect(() => {
     if (eventEmitter) {
-      const startHandler = () => {}
-      const stopHandler = () => {}
-      const stepChangeHandler = () => {}
+      const startHandler = () => {};
+      const stopHandler = () => {};
+      const stepChangeHandler = () => {};
 
-      eventEmitter.on('start', startHandler)
-      eventEmitter.on('stop', stopHandler)
-      eventEmitter.on('stepChange', stepChangeHandler)
+      eventEmitter.on('start', startHandler);
+      eventEmitter.on('stop', stopHandler);
+      eventEmitter.on('stepChange', stepChangeHandler);
 
       return () => {
-        eventEmitter.off('start', startHandler)
-        eventEmitter.off('stop', stopHandler)
-        eventEmitter.off('stepChange', stepChangeHandler)
-      }
+        eventEmitter.off('start', startHandler);
+        eventEmitter.off('stop', stopHandler);
+        eventEmitter.off('stepChange', stepChangeHandler);
+      };
     }
-  }, [eventEmitter])
+  }, [eventEmitter]);
 
   React.useEffect(() => {
     if (eventEmitterAdvanced) {
-      const startHandler = () => {}
-      const stopHandler = () => {}
-      const stepChangeHandler = () => {}
+      const startHandler = () => {};
+      const stopHandler = () => {};
+      const stepChangeHandler = () => {};
 
-      eventEmitterAdvanced.on('start', startHandler)
-      eventEmitterAdvanced.on('stop', stopHandler)
-      eventEmitterAdvanced.on('stepChange', stepChangeHandler)
+      eventEmitterAdvanced.on('start', startHandler);
+      eventEmitterAdvanced.on('stop', stopHandler);
+      eventEmitterAdvanced.on('stepChange', stepChangeHandler);
 
       return () => {
-        eventEmitterAdvanced.off('start', startHandler)
-        eventEmitterAdvanced.off('stop', stopHandler)
-        eventEmitterAdvanced.off('stepChange', stepChangeHandler)
-      }
+        eventEmitterAdvanced.off('start', startHandler);
+        eventEmitterAdvanced.off('stop', stopHandler);
+        eventEmitterAdvanced.off('stepChange', stepChangeHandler);
+      };
     }
-  }, [eventEmitterAdvanced])
-
-  // If showing simple test, render it instead
-  if (showSimpleTest) {
-    return <SimpleLeaderLineTest onGoBack={() => setShowSimpleTest(false)} />
-  }
+  }, [eventEmitterAdvanced]);
 
   return (
     <ScrollView
@@ -137,14 +128,6 @@ const AppContent = () => {
         <View style={styles.middleView}>
           <TouchableOpacity style={styles.button} onPress={() => start()}>
             <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
-          </TouchableOpacity>
-
-          {/* Simple LeaderLine Test Button */}
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: '#e74c3c' }]}
-            onPress={() => setShowSimpleTest(true)}
-          >
-            <Text style={styles.buttonText}>TEST SIMPLE LEADERLINE</Text>
           </TouchableOpacity>
 
           <TourGuideZone
@@ -293,8 +276,8 @@ const AppContent = () => {
         ) : null}
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -340,6 +323,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-})
+});
 
-export default App
+export default App;

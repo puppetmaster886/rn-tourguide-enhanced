@@ -3,17 +3,72 @@
 <p align="center">
   A flexible <strong>tourguide</strong> for your react native app!
   <br/><small>🎉 Webable 🎉</small>
-  <br/><small>(a rewriting of react-native-copilot)</small>
+  <br/><small>(an enhanced version of rn-tourguide with arrow connections)</small>
 </p>
 
+## Demo Example App
+
 <p align="center">
-  <img width="250" src="https://www.dropbox.com/s/9heua3qgd66125k/rn-tourguide.gif?dl=0&raw=1" alt="RN Tourguide" />
+  <img width="300" src="./demo-recording.gif" alt="Demo Example App Recording" />
 </p>
-<p align="center">
-    <a href="https://puppetmaster886.github.io/rn-tourguide-enhanced/">
-      🎉 DEMO WEB 🎉
-    </a>
-</p>
+
+## 🚀 Key Differences from rn-tourguide
+
+This library is an **enhanced version** of `rn-tourguide` with significant improvements and new features:
+
+### 🎯 Enhanced Arrow Connections with react-native-leader-line
+
+The most significant addition is the integration of **[react-native-leader-line](https://github.com/puppetmaster886/react-native-leader-line)** which provides:
+
+- **Visual connector arrows** between highlighted elements and tooltips
+- **Highly customizable** arrow styles, colors, and animations
+- **Smart positioning** that adapts to different screen sizes and orientations
+- **Built-in by default** - no additional setup required
+
+```tsx
+// Arrows are enabled by default
+<TourGuideZone zone={1} text="Connected with arrow!">
+  <Button title="Highlighted Element" />
+</TourGuideZone>
+
+// Customize arrow appearance
+<TourGuideZone
+  zone={2}
+  text="Custom arrow style"
+  leaderLineConfig={{
+    color: '#FF6B6B',
+    size: 3,
+    startPlug: 'circle',
+    endPlug: 'arrow3'
+  }}
+>
+  <Button title="Custom Arrow" />
+</TourGuideZone>
+```
+
+📖 **[Complete LeaderLine Documentation](./LEADER_LINE.md)**
+
+### 🎨 Enhanced Positioning & Layout
+
+- **Smart tooltip positioning** with `tooltipPosition` prop (`'relative'`, `'centered'`, `'auto'`)
+- **Enhanced mask offsets** with directional control (`{ top: 20, bottom: 15, left: 10, right: 25 }`)
+- **ScrollView integration** with automatic scrolling to tour steps
+- **Persistent tooltips** that remain visible during step transitions
+
+### 🌐 Improved Cross-Platform Support
+
+- **Full web compatibility** with React Native Web
+- **Better mobile responsiveness** across different screen sizes
+- **Enhanced TypeScript support** with comprehensive type definitions
+- **Modern React patterns** using hooks instead of HOCs
+
+### 🔧 Developer Experience Improvements
+
+- **Enhanced LeaderLine integration** with `react-native-leader-line` for visual arrow connections
+- **Improved positioning controls** with enhanced mask offsets and tooltip positioning
+- **Better ScrollView support** with automatic scrolling to tour steps
+- **Enhanced TypeScript support** with more comprehensive type definitions
+- **Performance optimizations** and bug fixes over the original `rn-tourguide`
 
 <div align="center">
   <p align="center">
@@ -34,20 +89,89 @@
 
 ## Installation
 
-```
-yarn add rn-tourguide
+```bash
+yarn add rn-tourguide-enhanced
 ```
 
-```
+### Dependencies
+
+This library requires the following peer dependencies:
+
+```bash
+# Required for SVG rendering and arrow connections
 yarn add react-native-svg
+
+# Required for drawing connector arrows (included automatically)
+yarn add react-native-leader-line
+```
+
+For React Native CLI projects:
+
+```bash
 react-native link react-native-svg
 ```
 
 If you are using Expo:
 
-```
+```bash
 expo install react-native-svg
 ```
+
+> **Note**: `react-native-leader-line` is automatically included as a dependency and provides the arrow connection functionality. See [LeaderLine Documentation](./LEADER_LINE.md) for customization options.
+
+## 🚀 Quick Start
+
+```tsx
+import React from 'react'
+import { View, Text, Button } from 'react-native'
+import {
+  TourGuideProvider,
+  TourGuideZone,
+  useTourGuideController,
+} from 'rn-tourguide-enhanced'
+
+function App() {
+  return (
+    <TourGuideProvider>
+      <AppContent />
+    </TourGuideProvider>
+  )
+}
+
+const AppContent = () => {
+  const { start, canStart } = useTourGuideController()
+
+  React.useEffect(() => {
+    if (canStart) {
+      start() // Start tour when ready
+    }
+  }, [canStart])
+
+  return (
+    <View style={{ flex: 1, padding: 20 }}>
+      <TourGuideZone
+        zone={1}
+        text='Welcome! This is your first step with arrows!'
+      >
+        <Text style={{ fontSize: 24 }}>Hello World</Text>
+      </TourGuideZone>
+
+      <TourGuideZone zone={2} text='Click me to continue the tour'>
+        <Button title='Next Step' onPress={() => {}} />
+      </TourGuideZone>
+    </View>
+  )
+}
+
+export default App
+```
+
+**Key features you get out of the box:**
+
+- ✅ **Automatic arrow connections** between tooltips and highlighted elements
+- ✅ **Smart positioning** that adapts to screen size and orientation
+- ✅ **Web compatibility** with React Native Web
+- ✅ **TypeScript support** with full type definitions
 
 ## Development
 
@@ -519,6 +643,52 @@ Sometimes you need to prevent users to interact with app while tour is shown, in
 
 ## 🆕 New Features
 
+### 🎯 LeaderLine Arrow Connections
+
+**Visual connector arrows** between highlighted elements and tooltips using [react-native-leader-line](https://github.com/puppetmaster886/react-native-leader-line):
+
+```tsx
+// Basic usage - arrows enabled by default
+<TourGuideZone zone={1} text="Connected with arrow!">
+  <Button title="Highlighted Element" />
+</TourGuideZone>
+
+// Global configuration
+<TourGuideProvider
+  leaderLineConfig={{
+    color: '#FF6B6B',
+    size: 3,
+    startPlug: 'circle',
+    endPlug: 'arrow3'
+  }}
+>
+  <AppContent />
+</TourGuideProvider>
+
+// Per-zone customization
+<TourGuideZone
+  zone={2}
+  text="Custom arrow style"
+  leaderLineConfig={{
+    color: '#4ECDC4',
+    size: 2,
+    dash: { len: 5, gap: 3 },
+    path: 'arc'
+  }}
+>
+  <Button title="Custom Arrow" />
+</TourGuideZone>
+```
+
+**Available configuration options:**
+
+- **Colors & Styling**: `color`, `size`, `dash`, `gradient`
+- **Connection Points**: `startPlug`, `endPlug` (circle, arrow1, arrow2, arrow3, etc.)
+- **Path Types**: `straight`, `arc`, `fluid`, `magnet`
+- **Animations**: `showEffectName`, `animOptions`
+
+📖 **[Complete LeaderLine Documentation](./LEADER_LINE.md)** for all configuration options and examples.
+
 ### ScrollView Support
 
 The tour guide now works seamlessly inside ScrollViews. Pass a scroll reference to automatically scroll to tour steps:
@@ -601,6 +771,7 @@ Control how the tooltip is positioned relative to the highlighted element:
 ```
 
 **Available values:**
+
 - `'relative'` (default): Tooltip always positions relative to the highlighted element, avoiding overlap. This is the original rn-tourguide behavior.
 - `'centered'`: Tooltip always stays centered on screen, regardless of highlighted element position.
 - `'auto'`: Automatically detects overlap. Centers the tooltip if there's no overlap with the highlighted element, otherwise uses relative positioning.

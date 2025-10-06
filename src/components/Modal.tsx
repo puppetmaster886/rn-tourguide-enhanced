@@ -37,8 +37,6 @@ const LeaderLine: React.FC<any> = (props) => {
   return React.createElement(OriginalLeaderLine, props)
 }
 
-declare var __TEST__: boolean
-
 export interface ModalProps {
   ref: any
   currentStep?: IStep
@@ -509,12 +507,12 @@ export class Modal extends React.Component<ModalProps, State> {
       return null
     }
 
-    // CRITICAL FIX: Force re-mount on step change to ensure onLayout is always called
+    // Force re-mount on step change to ensure onLayout is always called
     const highlightedKey = `highlighted-${
       this.props.currentStep?.name || 'none'
     }`
 
-    // View invisible posicionado en el área destacada para servir como referencia de LeaderLine
+    // Invisible view positioned in highlighted area to serve as LeaderLine reference
     return (
       <View
         ref={this.highlightedAreaRef}
@@ -640,7 +638,7 @@ export class Modal extends React.Component<ModalProps, State> {
         }
       : {}
 
-    // CRITICAL FIX: Force re-mount on step change to ensure onLayout is always called
+    // Force re-mount on step change to ensure onLayout is always called
     const tooltipKey = `tooltip-${this.props.currentStep?.name || 'none'}`
 
     return (
@@ -653,8 +651,8 @@ export class Modal extends React.Component<ModalProps, State> {
           this.props.tooltipStyle,
           horizontalStyles, // Apply only when tooltipLeftOffset is defined
           {
-            zIndex: TOOLTIP_Z_INDEX, // CRITICAL FIX: Superior al backdrop (9999) y LeaderLine (10000)
-            elevation: TOOLTIP_Z_INDEX, // Para Android
+            zIndex: TOOLTIP_Z_INDEX, // Higher than backdrop (9999) and LeaderLine (10000)
+            elevation: TOOLTIP_Z_INDEX, // For Android
             opacity,
             transform: [{ translateY: this.state.tooltipTranslateY }],
           },

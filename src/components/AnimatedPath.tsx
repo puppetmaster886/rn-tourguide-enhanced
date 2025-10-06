@@ -2,13 +2,13 @@ import React, { forwardRef } from 'react'
 import { Animated } from 'react-native'
 import { Path, PathProps } from 'react-native-svg'
 
-// Crear componente animado con manejo de errores para múltiples versiones
+// Create animated component with error handling for multiple versions
 let BaseAnimatedPath: any
 
 try {
   BaseAnimatedPath = Animated.createAnimatedComponent(Path)
 } catch (error: any) {
-  // Fallback para versiones que no soporten Animated.createAnimatedComponent con SVG
+  // Fallback for versions that don't support Animated.createAnimatedComponent with SVG
   BaseAnimatedPath = Path
 }
 

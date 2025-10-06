@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2025-10-06
+
+### Changed
+
+- **Code Quality**: Complete codebase cleanup and professionalization
+  - Removed all debug and test code from production files
+  - Translated all Spanish comments to English for international collaboration
+  - Removed SimpleLeaderLineTest debug component
+  - Cleaned up empty error handlers and unnecessary comments
+  - Fixed unused imports and variables
+  - Improved code documentation and clarity
+
+### Fixed
+
+- **TypeScript**: Fixed unused variable warnings in example applications
+- **React Hooks**: Fixed missing dependency warnings in useEffect hooks
+- **Imports**: Removed unused Text and View imports from TourGuideZone
+
+### Removed
+
+- **Debug Code**: Removed debug timestamps and test components from App.tsx
+- **Development Tools**: Removed internal testing utilities from production code
+
 ## [3.4.0] - 2025-06-02
 
 ### Added

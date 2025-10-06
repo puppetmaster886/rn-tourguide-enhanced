@@ -141,7 +141,7 @@ export const circleSvgPath = ({
     return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
   }
 
-  // ⚠️ WARNING: Elementos con dimensiones 0 (como triángulos CSS)
+  // Handle elements with zero dimensions (e.g., CSS triangles)
   if (size.x === 0 || size.y === 0) {
     const minSize = 80
     const radius = minSize / 2
@@ -181,10 +181,10 @@ export const ellipseSvgPath = ({
     return 'M0,0 a1 1 0 1 0 2 0 1 1 0 1 0-2 0'
   }
 
-  // ⚠️ WARNING: Elementos con dimensiones 0 (como triángulos CSS)
+  // Handle elements with zero dimensions (e.g., CSS triangles)
   if (size.x === 0 || size.y === 0) {
-    const minSizeX = 100 // Ancho
-    const minSizeY = 60 // Alto
+    const minSizeX = 100
+    const minSizeY = 60
     const radiusX = minSizeX / 2
     const radiusY = minSizeY / 2
     return [
@@ -403,10 +403,10 @@ export const svgMaskPathMorph = ({
     return previousPath
   }
 
-  // Si la animación está completa, usar la función simplificada
+  // If animation is complete, use simplified function
   const animValue = clamp(animation._value, 0, 1)
   if (animValue >= 0.99) {
-    // Extraer dimensiones del canvas del previousPath
+    // Extract canvas dimensions from previousPath
     const canvasMatch = previousPath.match(
       /M0,0H(\d+(?:\.\d+)?)V(\d+(?:\.\d+)?)H0V0Z/,
     )
@@ -422,7 +422,7 @@ export const svgMaskPathMorph = ({
         size,
         offset,
         borderRadius || 0,
-        shape, // ⭐ CRÍTICO: Pasar el shape para que se aplique!
+        shape,
       )
     }
   }
@@ -504,7 +504,7 @@ export const createMaskPathWithHole = (
   holeSize: ValueXY,
   maskOffset: number = 0,
   borderRadius: number = 0,
-  shape?: Shape, // ⭐ Nuevo parámetro para soportar diferentes shapes
+  shape?: Shape,
 ): string => {
   // Validate inputs to prevent NaN in path
   if (
@@ -528,8 +528,7 @@ export const createMaskPathWithHole = (
   let width = holeSize.x + maskOffset * 2
   let height = holeSize.y + maskOffset * 2
 
-  // ⚠️ Para elementos con dimensiones 0 (triángulos CSS), usar tamaños mínimos
-  // Esto solo debería pasar con elementos CSS especiales, no con iconos normales
+  // For elements with zero dimensions (CSS triangles), use minimum sizes
   if (holeSize.x === 0 || holeSize.y === 0) {
     if (shape === 'ellipse') {
       width = 100 + maskOffset * 2
@@ -547,25 +546,25 @@ export const createMaskPathWithHole = (
   // Create path that fills entire canvas
   let path = `M0,0H${canvasWidth}V${canvasHeight}H0V0Z`
 
-  // ⭐ NUEVO: Soportar diferentes shapes
+  // Support different shapes
   if (shape === 'circle' || shape === 'circle_and_keep') {
-    // Para circle, usar el radio máximo + offset
+    // For circle, use maximum radius + offset
     const radius = Math.max(width, height) / 2
     const centerX = x + width / 2
     const centerY = y + height / 2
 
-    // Círculo usando arcos SVG (dos semicírculos)
+    // Circle using SVG arcs (two semicircles)
     path += `M${centerX - radius},${centerY}`
     path += `a${radius},${radius} 0 1,0 ${radius * 2},0`
     path += `a${radius},${radius} 0 1,0 -${radius * 2},0Z`
   } else if (shape === 'ellipse') {
-    // Para ellipse, usar radiusX y radiusY diferentes
+    // For ellipse, use different radiusX and radiusY
     const radiusX = width / 2
     const radiusY = height / 2
     const centerX = x + width / 2
     const centerY = y + height / 2
 
-    // Elipse usando arcos SVG
+    // Ellipse using SVG arcs
     path += `M${centerX - radiusX},${centerY}`
     path += `a${radiusX},${radiusY} 0 1,0 ${radiusX * 2},0`
     path += `a${radiusX},${radiusY} 0 1,0 -${radiusX * 2},0Z`

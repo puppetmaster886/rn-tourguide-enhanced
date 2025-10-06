@@ -119,9 +119,6 @@ function CustomTooltip({
   );
 }
 
-// Timestamp para verificar código actualizado
-const APP_BUILD_TIMESTAMP = '2025-10-03_19:30:00_SVGMASK_SIMPLIFIED';
-
 function Section({children, title}: any) {
   const isDarkMode = useColorScheme() === 'dark';
   return (
@@ -158,8 +155,8 @@ function AppContent() {
 
   React.useEffect(() => {
     if (eventEmitter) {
-      const handleStepChange = (event: any) => {
-        // Step changed
+      const handleStepChange = (_event: any) => {
+        // Handle step change event
       };
 
       eventEmitter.on('stepChange', handleStepChange);
@@ -211,12 +208,12 @@ function AppContent() {
               tooltipPosition="centered"
               shape="rectangle"
               leaderLineConfig={{
-                color: '#4CAF50', // Verde para este step
-                endPlugColor: '#4CAF50', // Flecha también verde
-                size: 4, // Línea más gruesa
+                color: '#4CAF50',
+                endPlugColor: '#4CAF50',
+                size: 4,
                 endPlugSize: 14,
-                endPlug: 'arrow1', // Flecha de estilo diferente
-                path: 'arc', // Línea curva
+                endPlug: 'arrow1',
+                path: 'arc',
               }}>
               <Section title="See Your Changes">
                 <Text>When you make changes, you'll see them here!</Text>
@@ -239,7 +236,7 @@ function AppContent() {
                 endPlugOffset: 4,
                 endPlug: 'lineArrowWide',
                 endSocket: 'right',
-                path: 'magnet', // Línea curva
+                path: 'magnet',
               }}>
               <View style={styles.iconWrapper}>
                 <TouchableOpacity
@@ -267,7 +264,7 @@ function AppContent() {
                 endPlug: 'lineArrow',
                 startSocket: 'top',
                 endSocket: 'bottom',
-                path: 'fluid', // Línea curva
+                path: 'fluid',
               }}>
               <View style={styles.iconWrapper}>
                 <TouchableOpacity
@@ -288,7 +285,7 @@ function AppContent() {
               leaderLineConfig={{
                 color: 'grey',
                 endPlugColor: 'grey',
-                path: 'arc', // Línea curva
+                path: 'arc',
               }}
               maskOffset={5}>
               <Section title="Learn More">

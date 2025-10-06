@@ -114,16 +114,6 @@ export const TourGuideProvider = ({
     _default: new mitt(),
   })
 
-  // Ensure eventEmitter is initialized for any key requested
-  // @ts-ignore - Reserved for future use
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const getOrCreateEventEmitter = (key: string) => {
-    if (!eventEmitter[key]) {
-      eventEmitter[key] = new mitt()
-    }
-    return eventEmitter[key]
-  }
-
   const modal = useRef<any>()
 
   useEffect(() => {
@@ -207,25 +197,23 @@ export const TourGuideProvider = ({
       top: Math.round(size.y) - OFFSET_WIDTH / 2 + (verticalOffset || 0),
     }
 
-    // COORDINACIÓN MEJORADA: Ejecutar animaciones secuencialmente
-    // Esto evita conflictos entre SvgMask y Modal animaciones
+    // Execute animations sequentially to avoid conflicts between SvgMask and Modal animations
     try {
       await modal.current?.animateMove(moveParams)
 
-      // Pequeño delay para asegurar que las animaciones se estabilicen
+      // Small delay to ensure animations stabilize
       await new Promise((resolve) => setTimeout(resolve, 100))
 
-      // Forzar un re-render final para asegurar visibilidad
+      // Force final re-render to ensure visibility
       if (modal.current) {
         setTimeout(() => {
-          // Null-safe check: modal might unmount before timeout executes
           if (modal.current) {
             modal.current.forceUpdate()
           }
         }, 50)
       }
     } catch (error) {
-      // Error en animateMove
+      // Animation error - safely ignore
     }
   }
 

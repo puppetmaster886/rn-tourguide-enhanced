@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.3] - 2025-10-20
+
+### Changed
+
+- **Dependencies**: Updated `react-native-leader-line` from ^1.6.0 to ^1.7.0
+  - Restores compatibility with React Native 0.70.x - 0.73.x
+  - Improved cross-version support for broader React Native ecosystem
+
+### Compatibility
+
+- **React Native Support Restored**: Now compatible with React Native >= 0.70.0 (previously required >= 0.74.5)
+- **react-native-svg**: Supports versions >= 12.0.0 < 16.0.0 (previously >= 15.2.0)
+- Projects using React Native 0.70, 0.71, 0.72, 0.73, and 0.74+ can now use this library
+
+### Documentation
+
+- Added compatibility matrix in README showing version requirements
+- Clarified React Native version support in documentation
+
+## [3.5.2] - 2025-10-16
+
+### Changed
+
+- **Dependencies**: Updated `react-native-leader-line` from ^1.6.0 to ^1.7.0
+  - Restores compatibility with React Native 0.70.x - 0.73.x
+  - Improved cross-version support for broader React Native ecosystem
+
+### Compatibility
+
+- **React Native Support Restored**: Now compatible with React Native >= 0.70.0 (previously required >= 0.74.5)
+- **react-native-svg**: Supports versions >= 12.0.0 < 16.0.0 (previously >= 15.2.0)
+- Projects using React Native 0.70, 0.71, 0.72, 0.73, and 0.74+ can now use this library
+
+### Documentation
+
+- Added compatibility matrix in README showing version requirements
+- Clarified React Native version support in documentation
+
 ## [3.5.1] - 2025-10-06
 
 ### Changed

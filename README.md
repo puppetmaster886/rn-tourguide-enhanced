@@ -274,7 +274,16 @@ rn-tourguide-enhanced/
 - **Node.js**: >= 18 (see `.nvmrc`)
 - **React Native**: >= 0.70.0
 - **React**: >= 18.0.0
-- **react-native-svg**: >= 12.0.0
+- **react-native-svg**: >= 12.0.0 < 16.0.0
+
+### Compatibility
+
+| rn-tourguide-enhanced | React Native | React     | react-native-svg   |
+| --------------------- | ------------ | --------- | ------------------ |
+| 3.5.2+                | >= 0.70.0    | >= 18.0.0 | >= 12.0.0 < 16.0.0 |
+| 3.5.0 - 3.5.1         | >= 0.74.5    | >= 18.0.0 | >= 15.2.0          |
+
+**Note:** Version 3.5.2+ restores compatibility with React Native 0.70.x - 0.73.x thanks to updated `react-native-leader-line` dependency.
 
 ### Troubleshooting
 

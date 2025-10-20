@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1] - 2025-10-20
+
+### Fixed
+
+- **Critical Bug**: Fixed CommonJS import compatibility issue in production builds with Hermes
+  - Error: "mitt.default is not a function (it is undefined)"
+  - Enabled `esModuleInterop: true` in tsconfig.json to generate proper interop helpers
+  - TypeScript now generates `__importDefault` helper that correctly wraps CommonJS modules
+  - Ensures mitt import works correctly in all React Native environments (Metro, Hermes, JSC)
+
+### Changed
+
+- **TypeScript Configuration**: Added `esModuleInterop: true` to align with React Native best practices
+  - Follows @tsconfig/react-native standard configuration
+  - Improves compatibility with CommonJS modules
+  - No breaking changes for library consumers
+
+### Technical Details
+
+When mitt@3.0.1 exports as `module.exports = function()` without a `.default` property, the previous configuration would generate code that tried to call `mitt_1.default()` which was undefined. With `esModuleInterop: true`, TypeScript generates proper helper functions that wrap CommonJS exports correctly, ensuring `mitt_1.default()` always works.
+
 ## [3.6.0] - 2025-10-20
 
 ### Fixed

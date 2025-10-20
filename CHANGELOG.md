@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2025-10-20
+
+### Fixed
+
+- **Critical Bug**: Fixed runtime error "Cannot read property 'prototype' of undefined" when mitt@3.x is resolved by Metro Bundler
+  - Changed all `new mitt()` calls to `mitt()` for correct usage of mitt as a factory function
+  - This fix ensures compatibility when other packages in the dependency tree use mitt@3.x
+  - Affected locations: `src/components/TourGuideProvider.tsx` (lines 114, 299, 353)
+
+### Changed
+
+- **Dependencies**: Updated `mitt` from ~1.1.3 to ^3.0.1
+  - Uses modern event emitter implementation
+  - Better performance and TypeScript support
+  - Reduces version conflicts in consuming projects
+
+### Compatibility
+
+- Fully backward compatible with existing code
+- No API changes for library consumers
+- Both mitt@1.x and mitt@3.x usage patterns now supported internally
+
 ## [3.5.3] - 2025-10-20
 
 ### Changed

@@ -1,4 +1,4 @@
-import mitt, { Emitter } from 'mitt'
+import mitt from 'mitt'
 import React, { useMemo, useEffect, useState, useRef } from 'react'
 import {
   Dimensions,
@@ -14,7 +14,7 @@ import * as utils from '../utilities'
 import { Modal } from './Modal'
 import { OFFSET_WIDTH } from './style'
 import { TooltipProps } from './Tooltip'
-import { Ctx, TourGuideContext } from './TourGuideContext'
+import { Ctx, TourGuideContext, Emitter } from './TourGuideContext'
 
 /*
 This is the maximum wait time for the steps to be registered before starting the tutorial
@@ -111,7 +111,7 @@ export const TourGuideProvider = ({
   const { current: mounted } = useIsMounted()
 
   const { current: eventEmitter } = useRef<Ctx<Emitter>>({
-    _default: new mitt(),
+    _default: mitt(),
   })
 
   const modal = useRef<any>()
@@ -296,7 +296,7 @@ export const TourGuideProvider = ({
       return newSteps
     })
     if (!eventEmitter[key]) {
-      eventEmitter[key] = new mitt()
+      eventEmitter[key] = mitt()
     }
   }
 
@@ -350,7 +350,7 @@ export const TourGuideProvider = ({
     const proxiedEventEmitter = new Proxy(eventEmitter, {
       get: (target, key: string) => {
         if (!target[key]) {
-          target[key] = new mitt()
+          target[key] = mitt()
         }
 
         const result = target[key]

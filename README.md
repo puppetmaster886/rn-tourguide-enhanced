@@ -23,7 +23,7 @@
 ## Demo Example App
 
 <p align="center">
-  <img width="300" src="./demo-recording.gif" alt="Demo Example App Recording" />
+  <img width="300" src="https://raw.githubusercontent.com/puppetmaster886/rn-tourguide-enhanced/main/demo.gif" alt="Demo Example App Recording" />
 </p>
 
 ## Key Features

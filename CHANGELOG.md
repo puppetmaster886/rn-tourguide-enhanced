@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.3] - 2025-10-21
+
+### Changed
+
+- **README**: Updated demo GIF to display correctly on npm
+  - Replaced `demo-recording.gif` with new `demo.gif`
+  - Changed image URL to GitHub raw URL format for npm compatibility
+  - Now using: `https://raw.githubusercontent.com/puppetmaster886/rn-tourguide-enhanced/main/demo.gif`
+  - This ensures the demo GIF displays correctly on both GitHub and npm package page
+
+### Technical Details
+
+npm requires absolute URLs for images in README files. Using relative paths (like `./demo.gif`) works on GitHub but fails on npm due to CORS restrictions. The GitHub raw URL format (`raw.githubusercontent.com`) is the standard solution for displaying images in npm package READMEs.
+
 ## [3.6.2] - 2025-10-21
 
 ### Changed

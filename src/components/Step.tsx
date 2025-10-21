@@ -8,7 +8,7 @@ import {
 import { ConnectedStep } from './ConnectedStep'
 import { TourGuideContext } from './TourGuideContext'
 
-interface Props {
+interface Props<TCustomData = any> {
   name: string
   order: number
   text: string
@@ -23,9 +23,10 @@ interface Props {
   tooltipLeftOffset?: number
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
+  tooltipCustomData?: TCustomData
 }
 
-export const Step = (props: Props) => {
+export const Step = <TCustomData = any,>(props: Props<TCustomData>) => {
   const context = React.useContext(TourGuideContext)
   return <ConnectedStep {...{ ...props, context }} />
 }

@@ -37,14 +37,14 @@ const LeaderLine: React.FC<any> = (props) => {
   return React.createElement(OriginalLeaderLine, props)
 }
 
-export interface ModalProps {
+export interface ModalProps<TCustomData = any> {
   ref: any
-  currentStep?: IStep
+  currentStep?: IStep<TCustomData>
   visible?: boolean
   isFirstStep: boolean
   isLastStep: boolean
   animationDuration?: number
-  tooltipComponent: React.ComponentType<TooltipProps>
+  tooltipComponent: React.ComponentType<TooltipProps<TCustomData>>
   tooltipStyle?: StyleProp<ViewStyle>
   maskOffset?: MaskOffset
   borderRadius?: number
@@ -70,7 +70,7 @@ interface Layout {
   height?: number
 }
 
-interface State {
+interface State<TCustomData = any> {
   isFirstStep: boolean
   isLastStep: boolean
   tooltip: object
@@ -81,7 +81,7 @@ interface State {
   position?: ValueXY
   tooltipTranslateY: Animated.Value
   opacity: Animated.Value
-  currentStep?: IStep
+  currentStep?: IStep<TCustomData>
   tooltipLayoutReady: boolean
   highlightedAreaLayoutReady: boolean
 }
@@ -93,7 +93,10 @@ interface Move {
   height: number
 }
 
-export class Modal extends React.Component<ModalProps, State> {
+export class Modal<TCustomData = any> extends React.Component<
+  ModalProps<TCustomData>,
+  State<TCustomData>
+> {
   static defaultProps = {
     easing: Easing.elastic(0.7),
     animationDuration: 400,
@@ -113,7 +116,7 @@ export class Modal extends React.Component<ModalProps, State> {
   private containerRef = React.createRef<View>()
   private highlightedAreaRef = React.createRef<View>()
 
-  state = {
+  state: State<TCustomData> = {
     isFirstStep: this.props.isFirstStep,
     isLastStep: this.props.isLastStep,
     tooltip: {},
@@ -128,11 +131,11 @@ export class Modal extends React.Component<ModalProps, State> {
     highlightedAreaLayoutReady: false,
   }
 
-  constructor(props: ModalProps) {
+  constructor(props: ModalProps<TCustomData>) {
     super(props)
   }
 
-  componentDidUpdate(prevProps: ModalProps) {
+  componentDidUpdate(prevProps: ModalProps<TCustomData>) {
     if (prevProps.visible === true && this.props.visible === false) {
       this.reset()
     }
@@ -673,6 +676,7 @@ export class Modal extends React.Component<ModalProps, State> {
             handleStop={this.handleStop}
             labels={this.props.labels}
             connectionRef={this.customTooltipConnectionRef}
+            tooltipCustomData={this.state.currentStep!.tooltipCustomData}
           />
         </View>
       </Animated.View>

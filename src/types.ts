@@ -18,7 +18,7 @@ export type LeaderLineConfig = Partial<LeaderLineOptions> & {
   enabled?: boolean // Our custom addition for enabling/disabling
 }
 
-export interface IStep {
+export interface IStep<TCustomData = any> {
   name: string
   order: number
   visible?: boolean
@@ -34,11 +34,14 @@ export interface IStep {
   tooltipPosition?: TooltipPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
+  tooltipCustomData?: TCustomData
 }
-export interface StepObject {
-  [key: string]: IStep
+export interface StepObject<TCustomData = any> {
+  [key: string]: IStep<TCustomData>
 }
-export type Steps = StepObject | IStep[]
+export type Steps<TCustomData = any> =
+  | StepObject<TCustomData>
+  | IStep<TCustomData>[]
 
 export interface ValueXY {
   x: number

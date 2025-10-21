@@ -3,7 +3,7 @@ import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { BorderRadiusObject, Shape, TooltipPosition } from '../types'
 import { TourGuideZone } from './TourGuideZone'
 
-export interface TourGuideZoneByPositionProps {
+export interface TourGuideZoneByPositionProps<TCustomData = any> {
   zone: number
   tourKey?: string
   isTourGuide?: boolean
@@ -20,9 +20,10 @@ export interface TourGuideZoneByPositionProps {
   tooltipBottomOffset?: number
   tooltipPosition?: TooltipPosition
   text?: string
+  tooltipCustomData?: TCustomData
 }
 
-export const TourGuideZoneByPosition = ({
+export const TourGuideZoneByPosition = <TCustomData = any,>({
   isTourGuide,
   zone,
   tourKey = '_default',
@@ -39,7 +40,8 @@ export const TourGuideZoneByPosition = ({
   tooltipPosition,
   borderRadiusObject,
   text,
-}: TourGuideZoneByPositionProps) => {
+  tooltipCustomData,
+}: TourGuideZoneByPositionProps<TCustomData>) => {
   if (!isTourGuide) {
     return null
   }
@@ -60,6 +62,7 @@ export const TourGuideZoneByPosition = ({
           tooltipPosition,
           borderRadiusObject,
           text,
+          tooltipCustomData,
         }}
         style={{
           position: 'absolute',

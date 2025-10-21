@@ -10,7 +10,7 @@ import {
 import { Step } from './Step'
 import { Wrapper } from './Wrapper'
 
-export interface TourGuideZoneProps {
+export interface TourGuideZoneProps<TCustomData = any> {
   zone: number
   tourKey?: string
   isTourGuide?: boolean
@@ -26,9 +26,10 @@ export interface TourGuideZoneProps {
   tooltipPosition?: TooltipPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
+  tooltipCustomData?: TCustomData
 }
 
-export const TourGuideZone = ({
+export const TourGuideZone = <TCustomData = any,>({
   isTourGuide = true,
   tourKey = '_default',
   zone,
@@ -44,7 +45,8 @@ export const TourGuideZone = ({
   tooltipPosition,
   borderRadiusObject,
   leaderLineConfig,
-}: TourGuideZoneProps) => {
+  tooltipCustomData,
+}: TourGuideZoneProps<TCustomData>) => {
   if (!isTourGuide) {
     return <>{children}</>
   }
@@ -65,6 +67,7 @@ export const TourGuideZone = ({
         tooltipPosition,
         borderRadiusObject,
         leaderLineConfig,
+        tooltipCustomData,
       }}
     >
       <Wrapper {...{ style }}>{children}</Wrapper>

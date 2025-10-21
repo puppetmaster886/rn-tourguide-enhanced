@@ -5,10 +5,10 @@ import { IStep, Labels, LeaderLineConfig } from '../types'
 import { Button } from './Button'
 import styles from './style'
 
-export interface TooltipProps {
+export interface TooltipProps<TCustomData = any> {
   isFirstStep?: boolean
   isLastStep?: boolean
-  currentStep: IStep
+  currentStep: IStep<TCustomData>
   labels?: Labels
   handleNext?: () => void
   handlePrev?: () => void
@@ -34,6 +34,7 @@ export interface TooltipProps {
    * ```
    */
   connectionRef?: React.RefObject<View>
+  tooltipCustomData?: TCustomData
 }
 
 export const Tooltip = ({

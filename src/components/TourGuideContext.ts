@@ -10,13 +10,13 @@ export interface Emitter {
 }
 export type Ctx<T extends any> = Record<string, T> & { _default: T }
 
-export interface ITourGuideContext {
+export interface ITourGuideContext<TCustomData = any> {
   setTourKey?: (tourKey: string) => void
   eventEmitter?: Ctx<Emitter>
   canStart: Ctx<boolean>
-  registerStep?(key: string, step: IStep): void
+  registerStep?(key: string, step: IStep<TCustomData>): void
   unregisterStep?(key: string, stepName: string): void
-  getCurrentStep?(key: string): IStep | undefined
+  getCurrentStep?(key: string): IStep<TCustomData> | undefined
   start?(key: string, fromStep?: number, scrollRef?: React.RefObject<any>): void
   stop?(key: string): void
   registerHighlightedElementRef?(key: string, ref: React.RefObject<View>): void

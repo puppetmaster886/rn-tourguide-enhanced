@@ -10,7 +10,7 @@ import { ITourGuideContext } from './TourGuideContext'
 
 declare var __TEST__: boolean
 
-interface Props {
+interface Props<TCustomData = any> {
   name: string
   text: string
   order: number
@@ -25,9 +25,12 @@ interface Props {
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
   leaderLineConfig?: LeaderLineConfig
+  tooltipCustomData?: TCustomData
 }
 
-export class ConnectedStep extends React.Component<Props> {
+export class ConnectedStep<TCustomData = any> extends React.Component<
+  Props<TCustomData>
+> {
   static defaultProps = {
     active: true,
   }

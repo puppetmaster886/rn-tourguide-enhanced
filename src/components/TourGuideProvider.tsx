@@ -22,8 +22,8 @@ At 60fps means 2 seconds
 */
 const MAX_START_TRIES = 120
 
-export interface TourGuideProviderProps {
-  tooltipComponent?: React.ComponentType<TooltipProps>
+export interface TourGuideProviderProps<TCustomData = any> {
+  tooltipComponent?: React.ComponentType<TooltipProps<TCustomData>>
   tooltipStyle?: StyleProp<ViewStyle>
   labels?: Labels
   androidStatusBarVisible?: boolean
@@ -41,7 +41,7 @@ export interface TourGuideProviderProps {
   leaderLineConfig?: LeaderLineConfig
 }
 
-export const TourGuideProvider = ({
+export const TourGuideProvider = <TCustomData = any,>({
   children,
   wrapperStyle,
   labels,
@@ -58,7 +58,7 @@ export const TourGuideProvider = ({
   preventOutsideInteraction = false,
   persistTooltip = false,
   leaderLineConfig,
-}: TourGuideProviderProps) => {
+}: TourGuideProviderProps<TCustomData>) => {
   const [scrollRef, setScrollRef] = useState<React.RefObject<any>>()
   const [tourKey, setTourKey] = useState<string | '_default'>('_default')
   const [visible, updateVisible] = useState<Ctx<boolean | undefined>>({
@@ -70,10 +70,12 @@ export const TourGuideProvider = ({
       newVisible[key] = value
       return newVisible
     })
-  const [currentStep, updateCurrentStep] = useState<Ctx<IStep | undefined>>({
+  const [currentStep, updateCurrentStep] = useState<
+    Ctx<IStep<TCustomData> | undefined>
+  >({
     _default: undefined,
   })
-  const [steps, setSteps] = useState<Ctx<Steps>>({ _default: [] })
+  const [steps, setSteps] = useState<Ctx<Steps<TCustomData>>>({ _default: [] })
 
   const [canStart, setCanStart] = useState<Ctx<boolean>>({ _default: false })
 
@@ -217,7 +219,7 @@ export const TourGuideProvider = ({
     }
   }
 
-  const setCurrentStep = async (key: string, step?: IStep) =>
+  const setCurrentStep = async (key: string, step?: IStep<TCustomData>) =>
     new Promise<void>(async (resolve) => {
       if (scrollRef && step) {
         await step.wrapper.measureLayout(
@@ -249,12 +251,12 @@ export const TourGuideProvider = ({
 
   const getNextStep = (
     key: string,
-    step: IStep | undefined = currentStep[key],
+    step: IStep<TCustomData> | undefined = currentStep[key],
   ) => utils.getNextStep(steps[key]!, step)
 
   const getPrevStep = (
     key: string,
-    step: IStep | undefined = currentStep[key],
+    step: IStep<TCustomData> | undefined = currentStep[key],
   ) => utils.getPrevStep(steps[key]!, step)
 
   const getFirstStep = (key: string) => utils.getFirstStep(steps[key]!)
@@ -286,7 +288,7 @@ export const TourGuideProvider = ({
     setCurrentStep(key, undefined)
   }
 
-  const registerStep = (key: string, step: IStep) => {
+  const registerStep = (key: string, step: IStep<TCustomData>) => {
     setSteps((previousSteps) => {
       const newSteps = { ...previousSteps }
       newSteps[key] = {
@@ -306,7 +308,7 @@ export const TourGuideProvider = ({
     }
     setSteps((previousSteps) => {
       const newSteps = { ...previousSteps }
-      newSteps[key] = Object.entries(previousSteps[key] as StepObject)
+      newSteps[key] = Object.entries(previousSteps[key] as StepObject<TCustomData>)
         .filter(([key]) => key !== stepName)
         .reduce((obj, [key, val]) => Object.assign(obj, { [key]: val }), {})
       return newSteps
@@ -324,7 +326,7 @@ export const TourGuideProvider = ({
       setScrollRef(_scrollRef)
     }
     const currentStep = fromStep
-      ? (steps[key] as StepObject)[fromStep]
+      ? (steps[key] as StepObject<TCustomData>)[fromStep]
       : getFirstStep(key)
 
     if (startTries.current > MAX_START_TRIES) {

@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.2] - 2025-10-21
+
+### Changed
+
+- **Documentation**: Complete reorganization following npm 2025 best practices
+  - Created `/docs` directory with organized documentation structure
+  - New comprehensive guides:
+    - `docs/installation.md` - Complete installation and setup guide
+    - `docs/api-reference.md` - Full API documentation with TypeScript types
+    - `docs/contributing.md` - Development and contribution guide (formerly DEVELOPMENT.md)
+    - `docs/leader-line.md` - LeaderLine customization guide (formerly LEADER_LINE.md)
+  - New example documentation:
+    - `docs/examples/custom-tooltip.md` - Custom tooltip implementation (formerly CUSTOM_TOOLTIP_DATA_EXAMPLE.md)
+    - `docs/examples/scrollview-support.md` - ScrollView integration examples
+  - Simplified README.md to focus on overview and quick start with clear links to detailed docs
+  - Removed obsolete internal documentation files (INTEGRATION_TASKS.md, RELEASE_NOTES.md, GEMINI.md)
+
+### Benefits
+
+- Documentation is now versioned with code and published with npm package
+- Better discoverability and organization
+- Follows standards used by major projects (React, Vue, Next.js)
+- GitHub automatically renders `/docs` directory
+- Professional npm package presentation
+
+### Note
+
+This is a documentation-only release with no functional changes to the library.
+
 ## [3.6.1] - 2025-10-20
 
 ### Fixed

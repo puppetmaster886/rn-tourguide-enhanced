@@ -60,7 +60,9 @@ export const TourGuideProvider = <TCustomData = any,>({
   leaderLineConfig,
 }: TourGuideProviderProps<TCustomData>) => {
   const [scrollRef, setScrollRef] = useState<React.RefObject<any>>()
-  const [tourKey, setTourKey] = useState<string | '_default'>('_default')
+  const [activeTourKey, setActiveTourKey] = useState<string | undefined>(
+    undefined,
+  )
   const [visible, updateVisible] = useState<Ctx<boolean | undefined>>({
     _default: false,
   })
@@ -68,6 +70,11 @@ export const TourGuideProvider = <TCustomData = any,>({
     updateVisible((visible) => {
       const newVisible = { ...visible }
       newVisible[key] = value
+      if (value) {
+        setActiveTourKey(key)
+      } else if (activeTourKey === key) {
+        setActiveTourKey(undefined)
+      }
       return newVisible
     })
   const [currentStep, updateCurrentStep] = useState<
@@ -119,17 +126,20 @@ export const TourGuideProvider = <TCustomData = any,>({
   const modal = useRef<any>()
 
   useEffect(() => {
-    if (mounted && visible[tourKey] === false) {
-      eventEmitter[tourKey]?.emit('stop')
+    if (mounted && activeTourKey && visible[activeTourKey] === false) {
+      eventEmitter[activeTourKey]?.emit('stop')
     }
-  }, [visible])
+  }, [visible, activeTourKey, mounted, eventEmitter])
 
   useEffect(() => {
-    if (visible || (windowIsResized && currentStep) || currentStep) {
-      moveToCurrentStep(tourKey)
+    if (
+      activeTourKey &&
+      (visible || (windowIsResized && currentStep) || currentStep)
+    ) {
+      moveToCurrentStep(activeTourKey)
       setWindowResized(false)
     }
-  }, [visible, currentStep, windowIsResized])
+  }, [visible, currentStep, windowIsResized, activeTourKey])
 
   const setWindowIsResized = () => {
     setWindowResized(true)
@@ -152,29 +162,32 @@ export const TourGuideProvider = <TCustomData = any,>({
 
   useEffect(() => {
     if (mounted) {
-      if (steps[tourKey]) {
-        const stepData = steps[tourKey]
+      // Update canStart for all tour keys
+      Object.keys(steps).forEach((key) => {
+        const stepData = steps[key]
         if (
           (Array.isArray(stepData) && stepData.length > 0) ||
           (!Array.isArray(stepData) && Object.entries(stepData).length > 0)
         ) {
           setCanStart((obj) => {
             const newObj = { ...obj }
-            newObj[tourKey] = true
+            newObj[key] = true
             return newObj
           })
-          if (typeof startAtMount === 'string') {
-            start(startAtMount)
-          } else if (startAtMount) {
-            start('_default')
-          }
         } else {
           setCanStart((obj) => {
             const newObj = { ...obj }
-            newObj[tourKey] = false
+            newObj[key] = false
             return newObj
           })
         }
+      })
+
+      // Handle startAtMount
+      if (typeof startAtMount === 'string') {
+        start(startAtMount)
+      } else if (startAtMount) {
+        start('_default')
       }
     }
   }, [mounted, steps])
@@ -343,9 +356,9 @@ export const TourGuideProvider = <TCustomData = any,>({
       startTries.current = 0
     }
   }
-  const next = () => _next(tourKey)
-  const prev = () => _prev(tourKey)
-  const stop = () => _stop(tourKey)
+  const next = () => activeTourKey && _next(activeTourKey)
+  const prev = () => activeTourKey && _prev(activeTourKey)
+  const stop = () => activeTourKey && _stop(activeTourKey)
 
   // Enhanced context value with automatic eventEmitter initialization
   const contextValue = useMemo(() => {
@@ -368,7 +381,6 @@ export const TourGuideProvider = <TCustomData = any,>({
       start,
       stop,
       canStart,
-      setTourKey,
       registerHighlightedElementRef,
       unregisterHighlightedElementRef,
     }
@@ -380,7 +392,6 @@ export const TourGuideProvider = <TCustomData = any,>({
     start,
     stop,
     canStart,
-    setTourKey,
     registerHighlightedElementRef,
     unregisterHighlightedElementRef,
   ])
@@ -395,10 +406,10 @@ export const TourGuideProvider = <TCustomData = any,>({
             next,
             prev,
             stop,
-            visible: visible[tourKey],
-            isFirstStep: isFirstStep[tourKey],
-            isLastStep: isLastStep[tourKey],
-            currentStep: currentStep[tourKey],
+            visible: activeTourKey ? visible[activeTourKey] : false,
+            isFirstStep: activeTourKey ? isFirstStep[activeTourKey] : false,
+            isLastStep: activeTourKey ? isLastStep[activeTourKey] : false,
+            currentStep: activeTourKey ? currentStep[activeTourKey] : undefined,
             labels,
             tooltipComponent,
             tooltipStyle,
@@ -412,7 +423,9 @@ export const TourGuideProvider = <TCustomData = any,>({
             persistTooltip,
             leaderLineConfig,
             // Pass the highlightedElementRef to the Modal
-            highlightedElementRef: highlightedElementRef[tourKey],
+            highlightedElementRef: activeTourKey
+              ? highlightedElementRef[activeTourKey]
+              : undefined,
           }}
         />
       </TourGuideContext.Provider>

@@ -270,24 +270,14 @@ const AppContent = () => {
 
 ### Multiple Tours
 
-Use `tourKey` to manage multiple independent tours:
+Use `tourKey` to manage multiple independent tours. The library supports flexible usage patterns to fit your needs.
 
-**Option 1: Pass tourKey to zones**
+#### Basic Multiple Tours
 
-```tsx
-const { canStart, start, tourKey } = useTourGuideController('onboarding')
-
-return (
-  <TourGuideZone tourKey={tourKey} zone={1} text="Step 1">
-    <Component />
-  </TourGuideZone>
-)
-```
-
-**Option 2: Extract TourGuideZone from hook**
+**Option 1: Using the default tour**
 
 ```tsx
-const { canStart, start, TourGuideZone } = useTourGuideController('onboarding')
+const { canStart, start } = useTourGuideController()  // Uses '_default' tour key
 
 return (
   <TourGuideZone zone={1} text="Step 1">
@@ -295,6 +285,113 @@ return (
   </TourGuideZone>
 )
 ```
+
+**Option 2: Named tours with explicit tourKey**
+
+```tsx
+// Define tour zones with explicit tourKey
+const { canStart, start } = useTourGuideController('onboarding')
+
+return (
+  <TourGuideZone tourKey="onboarding" zone={1} text="Welcome!">
+    <Component />
+  </TourGuideZone>
+)
+```
+
+**Option 3: Using the pre-keyed TourGuideZone component**
+
+The hook returns a `TourGuideZone` component that automatically applies the tourKey:
+
+```tsx
+const { canStart, start, TourGuideZone } = useTourGuideController('onboarding')
+
+return (
+  // No need to pass tourKey - it's already bound to 'onboarding'
+  <TourGuideZone zone={1} text="Step 1">
+    <Component />
+  </TourGuideZone>
+)
+```
+
+**Option 4: Mixing hook tourKey with zone-specific override**
+
+You can call the hook without a tourKey and specify it per-zone:
+
+```tsx
+const { start } = useTourGuideController()  // No tourKey specified
+
+return (
+  <>
+    {/* This zone uses 'onboarding' tour */}
+    <TourGuideZone tourKey="onboarding" zone={1} text="Welcome">
+      <Component1 />
+    </TourGuideZone>
+
+    {/* This zone uses 'features' tour */}
+    <TourGuideZone tourKey="features" zone={1} text="New Features">
+      <Component2 />
+    </TourGuideZone>
+  </>
+)
+```
+
+**Option 5: Override tourKey from hook**
+
+Even when using the pre-keyed `TourGuideZone`, you can override the tourKey:
+
+```tsx
+const { TourGuideZone } = useTourGuideController('onboarding')
+
+return (
+  <>
+    {/* Uses 'onboarding' from hook */}
+    <TourGuideZone zone={1} text="Step 1">
+      <Component1 />
+    </TourGuideZone>
+
+    {/* Overrides to use 'advanced' tour */}
+    <TourGuideZone tourKey="advanced" zone={1} text="Advanced Step">
+      <Component2 />
+    </TourGuideZone>
+  </>
+)
+```
+
+#### Multiple Controllers for Same Tour
+
+**New in v3.6.5:** You can now use `useTourGuideController` from multiple components with the same `tourKey` without conflicts!
+
+```tsx
+// In HeaderComponent.tsx
+const HeaderActions = () => {
+  const { start, stop } = useTourGuideController('onboarding')
+
+  return (
+    <View>
+      <Button title="Start Tour" onPress={() => start()} />
+      <Button title="Stop Tour" onPress={stop} />
+    </View>
+  )
+}
+
+// In SidebarComponent.tsx
+const SidebarActions = () => {
+  const { start, canStart } = useTourGuideController('onboarding')  // Same tourKey!
+
+  return (
+    <View>
+      {canStart && (
+        <TouchableOpacity onPress={() => start()}>
+          <Text>Begin Onboarding</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  )
+}
+```
+
+Both components can control the **same tour** without interfering with each other. This is useful when you need tour controls in different parts of your UI.
 
 ### Custom Tooltips
 

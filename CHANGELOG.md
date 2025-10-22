@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.5] - 2025-10-22
+
+### Added
+
+- **Multiple Controllers Support**: Multiple components can now use `useTourGuideController` with the same `tourKey` without conflicts
+  - Eliminated global `tourKey` state that caused race conditions
+  - Introduced `activeTourKey` state to track which tour is currently visible
+  - Each controller instance can independently control the same tour
+  - Useful for having tour controls in different parts of the UI (header, sidebar, modals, etc.)
+
+### Changed
+
+- **Flexible tourKey Assignment**: Enhanced `KeyedTourGuideZone` and `KeyedTourGuideZoneByPosition` components
+  - `tourKey` prop is now **optional** instead of omitted from the component signature
+  - Allows mixing hook-level tourKey with zone-level overrides
+  - Pattern: `<TourGuideZone tourKey={zoneTourKey ?? hookTourKey}>`
+  - Supports these usage patterns:
+    1. Hook without tourKey + zone with tourKey
+    2. Hook with tourKey + zone without tourKey (uses hook's key)
+    3. Hook with tourKey + zone with different tourKey (override)
+    4. Hook without tourKey + zone without tourKey (uses default)
+
+- **Removed `setTourKey` from Context**: Simplified tour state management
+  - Removed `setTourKey` from `ITourGuideContext` interface
+  - Removed `setTourKey` function from `TourGuideProvider`
+  - Removed `useEffect` in `useTourGuideController` that called `setTourKey`
+  - Tours are now managed purely through the `visible` state and `activeTourKey`
+
+### Fixed
+
+- **Backdrop Not Showing on First Step**: Fixed missing initial animation for backdrop
+  - Added `componentDidMount` to `SvgMask` component
+  - Ensures opacity animation runs when the mask first appears
+  - Backdrop now correctly fades in from the start of the tour
+
+### Technical Details
+
+**State Management Changes:**
+- Replaced singular `tourKey` state with `activeTourKey` that tracks which tour is currently being displayed
+- `activeTourKey` is automatically updated when `setVisible()` is called
+- Modal receives tour data via `activeTourKey` instead of a global shared state
+- Prevents multiple hooks from competing to update the same state value
+
+**tourKey Precedence:**
+The library now supports maximum flexibility for tourKey assignment:
+```typescript
+// Zone-level tourKey takes precedence over hook-level
+const { TourGuideZone } = useTourGuideController('onboarding')
+<TourGuideZone tourKey="advanced" />  // Uses 'advanced', not 'onboarding'
+```
+
+**Breaking Changes:** None - all existing code continues to work as before. These changes are purely additive and fix existing bugs.
+
+### Documentation
+
+- Updated [API Reference](./docs/api-reference.md) with comprehensive multiple tours documentation
+  - 5 different usage patterns for tourKey management
+  - Examples of multiple controllers controlling the same tour
+  - Clear explanation of tourKey precedence rules
+- Updated [README.md](./README.md) with new "Flexible Tour Management" section
+- Added code examples showing multiple components controlling the same tour
+
 ## [3.6.4] - 2025-10-21
 
 ### Fixed

@@ -84,6 +84,10 @@ export class SvgMask extends Component<Props, State> {
     this.listenerID = this.state.animation.addListener(this.animationListener)
   }
 
+  componentDidMount() {
+    this.animate()
+  }
+
   componentDidUpdate(prevProps: Props) {
     if (
       prevProps.position !== this.props.position ||

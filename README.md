@@ -44,6 +44,13 @@ The most significant enhancement is the integration of **[react-native-leader-li
 - **ScrollView integration** with automatic scrolling to tour steps
 - **Persistent tooltips** that remain visible during step transitions
 
+### Flexible Tour Management
+
+- **Multiple tour support** with independent tour keys
+- **Multiple controllers** can control the same tour from different components
+- **Flexible tourKey assignment** - define at hook level, zone level, or both
+- **Dynamic tour switching** between different tour flows
+
 ### Cross-Platform Support
 
 - **Full web compatibility** with React Native Web
@@ -204,6 +211,49 @@ interface MyTooltipData {
 ```
 
 See the [Custom Tooltip Example](./docs/examples/custom-tooltip.md) for complete implementation.
+
+### Multiple Tours & Flexible Controllers
+
+**New in v3.6.5:** Enhanced flexibility for managing multiple tours and controllers.
+
+```tsx
+// Multiple components can control the same tour
+// HeaderComponent.tsx
+const HeaderActions = () => {
+  const { start, stop } = useTourGuideController('onboarding')
+  return <Button title="Start Tour" onPress={() => start()} />
+}
+
+// SidebarComponent.tsx
+const SidebarActions = () => {
+  const { start, canStart } = useTourGuideController('onboarding')  // Same tourKey!
+  return canStart ? <Button title="Begin" onPress={() => start()} /> : null
+}
+
+// Flexible tourKey assignment
+const { start, TourGuideZone } = useTourGuideController()
+
+return (
+  <>
+    {/* Specify tourKey per zone */}
+    <TourGuideZone tourKey="onboarding" zone={1} text="Welcome">
+      <Component1 />
+    </TourGuideZone>
+
+    {/* Or use pre-keyed component from hook */}
+    <TourGuideZone zone={1} text="Step 1">
+      <Component2 />
+    </TourGuideZone>
+
+    {/* Or override the hook's tourKey */}
+    <TourGuideZone tourKey="advanced" zone={1} text="Advanced">
+      <Component3 />
+    </TourGuideZone>
+  </>
+)
+```
+
+See the [API Reference](./docs/api-reference.md#multiple-tours) for all usage patterns.
 
 ## Requirements
 

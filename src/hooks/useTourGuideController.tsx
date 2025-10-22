@@ -10,15 +10,11 @@ import {
 export const useTourGuideController = (tourKey?: string) => {
   const context = React.useContext(TourGuideContext);
 
-  const { start, canStart, stop, eventEmitter, getCurrentStep, setTourKey } =
-    context;
+  const { start, canStart, stop, eventEmitter, getCurrentStep } = context;
 
   const key = tourKey ?? '_default';
 
   const _start = (fromStep?: number, scrollRef?: React.RefObject<any>) => {
-    if (setTourKey) {
-      setTourKey(key);
-    }
     if (start) {
       start(key, fromStep, scrollRef);
     }
@@ -45,31 +41,26 @@ export const useTourGuideController = (tourKey?: string) => {
     return undefined;
   };
 
-  React.useEffect(() => {
-    if (setTourKey) {
-      setTourKey(key);
-    }
-  }, [key, setTourKey]);
-
-  const KeyedTourGuideZone: React.FC<Omit<TourGuideZoneProps, 'tourKey'>> =
+  const KeyedTourGuideZone: React.FC<TourGuideZoneProps> =
     React.useCallback(
-      ({ children, ...rest }) => {
+      ({ tourKey: zoneTourKey, children, ...rest }) => {
         return (
-          <TourGuideZone {...rest} tourKey={key}>
+          <TourGuideZone {...rest} tourKey={zoneTourKey ?? key}>
             {children}
           </TourGuideZone>
         );
       },
       [key],
     );
-  const KeyedTourGuideZoneByPosition: React.FC<
-    Omit<TourGuideZoneByPositionProps, 'tourKey'>
-  > = React.useCallback(
-    (props) => {
-      return <TourGuideZoneByPosition {...props} tourKey={key} />;
-    },
-    [key],
-  );
+  const KeyedTourGuideZoneByPosition: React.FC<TourGuideZoneByPositionProps> =
+    React.useCallback(
+      ({ tourKey: zoneTourKey, ...props }) => {
+        return (
+          <TourGuideZoneByPosition {...props} tourKey={zoneTourKey ?? key} />
+        );
+      },
+      [key],
+    );
 
   return {
     start: _start,

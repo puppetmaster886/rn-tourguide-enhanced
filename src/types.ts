@@ -11,11 +11,20 @@ export type TooltipPosition =
   | 'auto' // Auto-detect: center if no overlap, relative if overlap (default)
 
 // Import official types from react-native-leader-line instead of defining our own
-import type { LeaderLineOptions } from 'react-native-leader-line'
+import type { LeaderLineProps } from 'react-native-leader-line'
 
-// Use a subset of the official LeaderLineOptions for our config
-export type LeaderLineConfig = Partial<LeaderLineOptions> & {
+// Use a subset of the official LeaderLineProps for our config
+export type LeaderLineConfig = Partial<
+  Omit<
+    LeaderLineProps,
+    'start' | 'end' | 'containerRef' | 'options' | 'children' | 'testID'
+  >
+> & {
+  updateThreshold?: number // Our custom addition for controlling update frequency
   enabled?: boolean // Our custom addition for enabling/disabling
+  style?: import('react-native').ViewStyle
+  optimizeUpdates?: boolean
+  smoothAnimations?: boolean
 }
 
 export interface IStep<TCustomData = any> {

@@ -176,6 +176,15 @@ All options from `react-native-leader-line` are supported. Here are the most com
 - `'crosshair'` - Crosshair marker
 - `'diamond'` - Diamond shape
 
+### Performance & Animation Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `optimizeUpdates` | `boolean` | `true` | Whether to optimize updates for better performance |
+| `updateThreshold` | `number` | `5` | Minimum pixel change to trigger update |
+| `smoothAnimations` | `boolean` | `false` | Enable smooth interpolation for animations |
+| `style` | `ViewStyle` | - | Container style for the leader line |
+
 ### Advanced Options
 
 | Option | Type | Description |
@@ -385,6 +394,25 @@ You **don't need** `connectionRef` when:
   leaderLineConfig={{
     startSocket: 'top',     // Top of tooltip
     endSocket: 'bottom',    // Bottom of element
+  }}
+>
+  <View />
+</TourGuideZone>
+```
+
+### Example 7: Performance & Animation Options
+
+```tsx
+<TourGuideZone
+  zone={1}
+  text="Smooth animations with optimized updates"
+  leaderLineConfig={{
+    smoothAnimations: true,      // Enable smooth interpolation
+    optimizeUpdates: true,       // Optimize update performance (default)
+    updateThreshold: 10,         // Only update if moved 10+ pixels
+    style: {
+      zIndex: 100,               // Custom container styles
+    },
   }}
 >
   <View />

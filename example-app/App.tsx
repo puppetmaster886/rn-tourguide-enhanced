@@ -116,6 +116,7 @@ function AppContent() {
               backgroundColor: '#E3F2FD',
             }}
             leaderLineConfig={{
+              updateThreshold: 5,
               endPlugOffset: 10,
               startPlugOffset: 5,
             }}>
@@ -217,6 +218,7 @@ function AppContent() {
             tooltipCustomData={{title: 'Docs', emoji: '📚'}}
             tooltipBottomOffset={100}
             leaderLineConfig={{
+              updateThreshold: 5,
               color: 'grey',
               endPlugColor: 'grey',
               path: 'arc',

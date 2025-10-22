@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.6] - 2025-10-22
+
+### Added
+
+- **LeaderLine Configuration**: Extended `leaderLineConfig` with new performance and styling options
+  - `style?: ViewStyle` - Custom container styles for the leader line
+  - `optimizeUpdates?: boolean` - Whether to optimize updates for better performance (default: true)
+  - `updateThreshold?: number` - Minimum pixel change to trigger update (default: 5)
+  - `smoothAnimations?: boolean` - Enable smooth interpolation for animations (default: false)
+
+### Documentation
+
+- Updated `docs/leader-line.md` with comprehensive documentation for new parameters
+  - Added "Performance & Animation Options" section with detailed parameter descriptions
+  - Added Example 7 showing usage of performance and animation options
+  - All options are fully typed and integrated with existing LeaderLine configuration system
+
 ## [3.6.5] - 2025-10-22
 
 ### Added

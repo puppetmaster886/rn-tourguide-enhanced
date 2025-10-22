@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.4] - 2025-10-21
+
+### Fixed
+
+- **ConnectedStep**: Fixed borderRadius inconsistent behavior between zone and provider
+  - Removed measurement adjustments based on borderRadius in ConnectedStep.tsx
+  - borderRadius now only affects visual mask rendering, not element measurements
+  - Ensures consistent behavior: zone parameters properly override provider parameters
+  - Parameter precedence is now correctly applied: zone > provider > default
+
+### Technical Details
+
+Previously, when `borderRadius` was set on a TourGuideZone, the `measure()` method in ConnectedStep was adjusting the element's x-coordinate and width (`x + borderRadius`, `width - borderRadius * 2`). This caused different behavior compared to when `borderRadius` was set on the provider. Now, `borderRadius` only affects the SVG mask rendering in SvgMask.tsx, ensuring consistent behavior regardless of where parameters are configured.
+
+All configurable parameters (`borderRadius`, `maskOffset`, `borderRadiusObject`, `tooltipPosition`, `leaderLineConfig`, etc.) now follow the correct precedence order consistently.
+
 ## [3.6.3] - 2025-10-21
 
 ### Changed

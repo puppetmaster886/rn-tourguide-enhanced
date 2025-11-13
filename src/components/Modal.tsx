@@ -18,7 +18,7 @@ import {
   MaskOffset,
   ValueXY,
 } from '../types'
-import styles, { MARGIN, TOOLTIP_Z_INDEX } from './style'
+import styles, { LEADER_LINE_Z_INDEX, MARGIN, TOOLTIP_Z_INDEX } from './style'
 import { SvgMask } from './SvgMask'
 import { Tooltip, TooltipProps } from './Tooltip'
 
@@ -582,7 +582,18 @@ export class Modal<TCustomData = any> extends React.Component<
     const { enabled, ...leaderLineOptions } = config
 
     return (
-      <View pointerEvents='none'>
+      <View
+        pointerEvents='none'
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: LEADER_LINE_Z_INDEX,
+          elevation: LEADER_LINE_Z_INDEX,
+        }}
+      >
         <LeaderLine
           start={{ element: tooltipConnectionRef }}
           end={{ element: this.highlightedAreaRef }}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RN TourGuide Enhanced - Documentation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px 30px;
+      }
+
+      .section {
+        margin-bottom: 35px;
+      }
+
+      .section h2 {
+        color: #667eea;
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+      }
+
+      .doc-list {
+        list-style: none;
+      }
+
+      .doc-item {
+        margin-bottom: 12px;
+      }
+
+      .doc-link {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        background: #f7f9fc;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+      }
+
+      .doc-link:hover {
+        background: #667eea;
+        color: white;
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .doc-link svg {
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .doc-link:hover svg {
+        fill: white;
+      }
+
+      .github-link {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: #24292e;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+      }
+
+      .github-link:hover {
+        background: #444d56;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px;
+        background: #f7f9fc;
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      @media (max-width: 768px) {
+        header h1 {
+          font-size: 2em;
+        }
+
+        .content {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📱 RN TourGuide Enhanced</h1>
+        <p>Interactive Tour Guide for React Native Apps</p>
+      </header>
+
+      <div class="content">
+        <section class="section">
+          <h2>📚 Getting Started</h2>
+          <ul class="doc-list">
+            <li class="doc-item">
+              <a href="installation.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path
+                    d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
+                  />
+                </svg>
+                <span
+                  ><strong>Installation</strong> - Setup and dependencies</span
+                >
+              </a>
+            </li>
+            <li class="doc-item">
+              <a href="api-reference.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path
+                    d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"
+                  />
+                </svg>
+                <span
+                  ><strong>API Reference</strong> - Complete API
+                  documentation</span
+                >
+              </a>
+            </li>
+            <li class="doc-item">
+              <a href="contributing.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                  />
+                </svg>
+                <span
+                  ><strong>Contributing</strong> - How to contribute to the
+                  project</span
+                >
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>⚡ Advanced Features</h2>
+          <ul class="doc-list">
+            <li class="doc-item">
+              <a href="leader-line.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path
+                    d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"
+                  />
+                </svg>
+                <span
+                  ><strong>Leader Lines</strong> - Connect tooltips with
+                  animated lines</span
+                >
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>💡 Examples</h2>
+          <ul class="doc-list">
+            <li class="doc-item">
+              <a href="examples/custom-tooltip.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+                  />
+                </svg>
+                <span
+                  ><strong>Custom Tooltip</strong> - Create custom styled
+                  tooltips</span
+                >
+              </a>
+            </li>
+            <li class="doc-item">
+              <a href="examples/scrollview-support.html" class="doc-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#667eea">
+                  <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+                </svg>
+                <span
+                  ><strong>ScrollView Support</strong> - Use with ScrollView
+                  components</span
+                >
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <div style="text-align: center">
+          <a
+            href="https://github.com/puppetmaster886/rn-tourguide-enhanced"
+            class="github-link"
+            target="_blank"
+          >
+            ⭐ View on GitHub
+          </a>
+        </div>
+      </div>
+
+      <footer>
+        <p>Made with ❤️ by the RN TourGuide Enhanced community</p>
+        <p style="margin-top: 10px; font-size: 0.85em">
+          <a
+            href="https://github.com/puppetmaster886/rn-tourguide-enhanced/issues"
+            style="color: #667eea; text-decoration: none"
+            >Report Issues</a
+          >
+          •
+          <a
+            href="https://github.com/puppetmaster886/rn-tourguide-enhanced/blob/main/LICENSE"
+            style="color: #667eea; text-decoration: none"
+            >License</a
+          >
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

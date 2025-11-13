@@ -22,6 +22,27 @@ At 60fps means 2 seconds
 */
 const MAX_START_TRIES = 120
 
+/**
+ * Props accepted by {@link TourGuideProvider}, allowing you to customize tooltip visuals, behavior, i18n, and LeaderLine wiring.
+ *
+ * @template TCustomData Type passed through tooltip props for advanced customization.
+ * @property {React.ComponentType<TooltipProps<TCustomData>>} [tooltipComponent] Optional custom tooltip component; use when the default bubble does not match your design.
+ * @property {StyleProp<ViewStyle>} [tooltipStyle] Style override applied to the default tooltip container; ignored when providing `tooltipComponent`.
+ * @property {Labels} [labels] Internationalization map for the tooltip buttons; defaults to the library’s English labels.
+ * @property {boolean} [androidStatusBarVisible] Toggles status bar visibility while the tour runs (Android only); defaults to the current system state.
+ * @property {string | boolean} [startAtMount=false] Auto-start behavior: `false` disables auto-start, `true` starts the `_default` tour, and a string starts the specified `tourKey`.
+ * @property {string} [backdropColor] CSS color used for the dimmed overlay; defaults to the built-in semi-transparent black.
+ * @property {number} [verticalOffset=0] Pixel offset applied to the highlighted area to fine tune tooltip positioning.
+ * @property {StyleProp<ViewStyle>} [wrapperStyle] Style override for the provider’s root view container.
+ * @property {number} [maskOffset] Extra padding around highlighted targets; defaults to the internal mask spacing.
+ * @property {number} [borderRadius] Corner radius applied to rectangular highlights; defaults to the built-in value.
+ * @property {number} [animationDuration] Duration in milliseconds for tooltip/mask transitions; defaults to the library’s smooth timing.
+ * @property {React.ReactNode} children Required subtree that will be wrapped by the provider so the tour context is available.
+ * @property {boolean} [dismissOnPress=false] When true any tap outside the tooltip stops the tour.
+ * @property {boolean} [preventOutsideInteraction=false] Blocks touches outside the tooltip/target while the tour runs; defaults to `false`.
+ * @property {boolean} [persistTooltip=false] Keeps the tooltip mounted during step transitions for smoother animations.
+ * @property {LeaderLineConfig} [leaderLineConfig] Default LeaderLine settings (color, size, plugs, etc.) applied to every zone unless overridden.
+ */
 export interface TourGuideProviderProps<TCustomData = any> {
   tooltipComponent?: React.ComponentType<TooltipProps<TCustomData>>
   tooltipStyle?: StyleProp<ViewStyle>
@@ -41,6 +62,42 @@ export interface TourGuideProviderProps<TCustomData = any> {
   leaderLineConfig?: LeaderLineConfig
 }
 
+/**
+ * Wraps your application with the tour context, orchestrates tooltip rendering, and exposes shared event emitters to `useTourGuideController`.
+ *
+ * @template TCustomData Custom data type forwarded to tooltip components.
+ * @param {TourGuideProviderProps<TCustomData>} props Component props.
+ * @param {React.ReactNode} props.children Required tree that should inherit tour capabilities.
+ * @param {StyleProp<ViewStyle>} [props.wrapperStyle] Optional provider container style; defaults to flex fill.
+ * @param {Labels} [props.labels] Optional label overrides for tooltip buttons.
+ * @param {React.ComponentType<TooltipProps<TCustomData>>} [props.tooltipComponent] Custom tooltip renderer.
+ * @param {StyleProp<ViewStyle>} [props.tooltipStyle] Style override for the default tooltip when `tooltipComponent` is not provided.
+ * @param {boolean} [props.androidStatusBarVisible] Controls Android status bar visibility (defaults to system).
+ * @param {string} [props.backdropColor] Overlay color (defaults to built-in dimmed background).
+ * @param {number} [props.animationDuration] Tooltip/mask animation duration in ms; defaults to library timing.
+ * @param {number} [props.maskOffset] Extra padding around highlighted targets; defaults to `undefined` (library spacing).
+ * @param {number} [props.borderRadius] Rectangular highlight radius (default internal value).
+ * @param {number} [props.verticalOffset=0] Offset applied to highlight measurements.
+ * @param {string | boolean} [props.startAtMount=false] Auto-start behavior (`false`, `true`, or specific tour key).
+ * @param {boolean} [props.dismissOnPress=false] Stops tour on overlay press when enabled.
+ * @param {boolean} [props.preventOutsideInteraction=false] Disables touches outside tooltips when true.
+ * @param {boolean} [props.persistTooltip=false] Keeps tooltips mounted during transitions for smoother animations.
+ * @param {LeaderLineConfig} [props.leaderLineConfig] Default LeaderLine settings applied to zones.
+ * @returns {JSX.Element} React element that provides context plus the modal/tooltip overlay wiring.
+ * @example
+ * ```tsx
+ * const App = () => (
+ *   <TourGuideProvider
+ *     labels={{ next: 'Next', finish: 'Done' }}
+ *     backdropColor="rgba(0,0,0,0.8)"
+ *     leaderLineConfig={{ color: '#fff' }}
+ *   >
+ *     <MainNavigator />
+ *   </TourGuideProvider>
+ * )
+ * ```
+ * @see https://puppetmaster886.github.io/rn-tourguide-enhanced/api-reference#tourguideprovider
+ */
 export const TourGuideProvider = <TCustomData = any,>({
   children,
   wrapperStyle,

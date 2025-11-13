@@ -354,6 +354,7 @@ export const TourGuideProvider = <TCustomData = any,>({
   const _prev = (key: string) => setCurrentStep(key, getPrevStep(key)!)
 
   const _stop = (key: string) => {
+    eventEmitter[key]?.emit('stop')
     setVisible(key, false)
     setCurrentStep(key, undefined)
   }

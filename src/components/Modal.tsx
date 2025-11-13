@@ -582,13 +582,15 @@ export class Modal<TCustomData = any> extends React.Component<
     const { enabled, ...leaderLineOptions } = config
 
     return (
-      <LeaderLine
-        start={{ element: tooltipConnectionRef }}
-        end={{ element: this.highlightedAreaRef }}
-        containerRef={this.containerRef}
-        {...leaderLineOptions}
-        strokeWidth={leaderLineOptions.size || 4}
-      />
+      <View pointerEvents='none'>
+        <LeaderLine
+          start={{ element: tooltipConnectionRef }}
+          end={{ element: this.highlightedAreaRef }}
+          containerRef={this.containerRef}
+          {...leaderLineOptions}
+          strokeWidth={leaderLineOptions.size || 4}
+        />
+      </View>
     )
   }
 
@@ -713,8 +715,8 @@ export class Modal<TCustomData = any> extends React.Component<
               {this.renderMask()}
               {this.renderHighlightedArea()}
               {this.renderNonInteractionPlaceholder()}
-              {this.renderTooltip()}
               {this.renderLeaderLine()}
+              {this.renderTooltip()}
             </>
           )}
         </View>

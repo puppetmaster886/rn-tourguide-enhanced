@@ -8,7 +8,7 @@ import styles from './style'
 export interface TooltipProps<TCustomData = any> {
   isFirstStep?: boolean
   isLastStep?: boolean
-  currentStep: IStep<TCustomData>
+  currentStep: IStep<TCustomData> // Includes `tourKey` so custom tooltips can inspect which tour is active.
   labels?: Labels
   handleNext?: () => void
   handlePrev?: () => void

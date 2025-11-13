@@ -30,6 +30,7 @@ export type LeaderLineConfig = Partial<
 export interface IStep<TCustomData = any> {
   name: string
   order: number
+  tourKey?: string
   visible?: boolean
   target: any
   text: string

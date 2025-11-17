@@ -2,7 +2,6 @@ import React from 'react';
 import {
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -238,7 +237,6 @@ function App(): React.JSX.Element {
   return (
     <TourGuideProvider<CustomTooltipData>
       tooltipComponent={CustomTooltip}
-      androidStatusBarVisible={true}
       backdropColor="rgba(0, 0, 0, 0.7)">
       <AppContent />
     </TourGuideProvider>

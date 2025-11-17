@@ -45,6 +45,18 @@ jest.mock('react-native', () => ({
   findNodeHandle: jest.fn(),
 }))
 
+// Mock safe area context
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react')
+  const insets = { top: 0, bottom: 0, left: 0, right: 0 }
+  return {
+    SafeAreaProvider: ({ children }: any) => children,
+    SafeAreaInsetsContext: React.createContext(insets),
+    useSafeAreaInsets: () => insets,
+    initialWindowMetrics: { insets },
+  }
+})
+
 // Simple mock for Modal component
 jest.mock('./Modal', () => ({
   Modal: jest.fn(() => null),
@@ -122,5 +134,15 @@ describe('PR #79 - persistTooltip functionality', () => {
         )
       }).not.toThrow()
     })
+  })
+
+  test('should accept statusBarOffset override', () => {
+    expect(() => {
+      renderer.create(
+        <TourGuideProvider statusBarOffset={42}>
+          <div>content</div>
+        </TourGuideProvider>,
+      )
+    }).not.toThrow()
   })
 })

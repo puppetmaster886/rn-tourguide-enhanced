@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.8.0] - 2025-11-17
+
+### Fixed
+
+- **Safe Area Alignment:** Automatically subtract the appropriate status bar / safe-area inset on iOS and Android so highlights align with their targets without any extra configuration.
+
+### Added
+
+- **`statusBarOffset` Override:** New optional `statusBarOffset` prop that lets apps supply a custom offset when the automatic detection does not match bespoke layouts. The legacy `androidStatusBarVisible` prop is now deprecated in favor of this cross-platform control.
+- **Safe Area Peer Dependency:** Added `react-native-safe-area-context` as a peer dependency to formalize the new behavior.
+
 ## [3.7.1] - 2025-11-13
 
 ### Fixed

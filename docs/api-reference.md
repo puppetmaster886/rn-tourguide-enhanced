@@ -45,7 +45,9 @@ interface TourGuideProviderProps {
   wrapperStyle?: StyleProp<ViewStyle>
 
   // Platform specific
+  /** @deprecated Use statusBarOffset instead */
   androidStatusBarVisible?: boolean
+  statusBarOffset?: number
   verticalOffset?: number
 
   // LeaderLine configuration
@@ -58,6 +60,9 @@ interface Labels {
   next?: string
   finish?: string
 }
+
+- `statusBarOffset` lets you manually override the automatically detected safe-area/status-bar compensation (useful for highly customized layouts). Leave it undefined to rely on `react-native-safe-area-context` on iOS and `StatusBar.currentHeight` on Android.
+- `androidStatusBarVisible` is retained for backwards compatibility but will be removed in a future major version—prefer configuring `statusBarOffset`.
 ```
 
 **Example:**

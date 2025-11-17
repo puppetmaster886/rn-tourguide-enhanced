@@ -212,6 +212,24 @@ interface MyTooltipData {
 
 See the [Custom Tooltip Example](./docs/examples/custom-tooltip.md) for complete implementation.
 
+### Status Bar & Safe Area Handling
+
+- iOS safe areas are automatically detected via `react-native-safe-area-context`; no extra configuration is required for devices with a notch or Dynamic Island.
+- Android keeps the previous `androidStatusBarVisible` prop for backwards compatibility, but you can now use the cross-platform `statusBarOffset` override when you need to force a custom offset (for example, when you render inside a translucent header).
+
+```tsx
+import { StatusBar, Platform } from 'react-native'
+
+const customOffset =
+  Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 24
+
+<TourGuideProvider statusBarOffset={customOffset}>
+  <AppContent />
+</TourGuideProvider>
+```
+
+> `androidStatusBarVisible` is deprecated and will be removed in a future major release—prefer the new `statusBarOffset` API.
+
 ### Multiple Tours & Flexible Controllers
 
 **New in v3.6.5:** Enhanced flexibility for managing multiple tours and controllers.

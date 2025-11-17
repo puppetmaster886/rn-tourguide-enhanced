@@ -3,8 +3,6 @@ import {
   Animated,
   Easing,
   LayoutChangeEvent,
-  Platform,
-  StatusBar,
   StyleProp,
   StyleSheet,
   View,
@@ -239,10 +237,6 @@ export class Modal<TCustomData = any> extends React.Component<
     },
   ) {
     const layout = await this.measure()
-
-    if (!this.props.androidStatusBarVisible && Platform.OS === 'android') {
-      obj.top -= StatusBar.currentHeight || 30
-    }
 
     // Estimated tooltip dimensions (width: 80% of screen from Tooltip.tsx, height: estimated)
     const TOOLTIP_HEIGHT = 135

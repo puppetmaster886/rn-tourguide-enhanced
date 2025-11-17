@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as React from 'react';
 import {
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,7 +24,6 @@ function App() {
     <TourGuideProvider
       {...{
         borderRadius: 16,
-        androidStatusBarVisible: true,
         persistTooltip: true,
         // Basic LeaderLine configuration
         leaderLineConfig: {

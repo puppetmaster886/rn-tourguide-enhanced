@@ -3,11 +3,17 @@ import React, { useMemo, useEffect, useState, useRef } from 'react'
 import {
   Dimensions,
   findNodeHandle,
+  Platform,
+  StatusBar,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
 } from 'react-native'
+import {
+  initialWindowMetrics,
+  SafeAreaInsetsContext,
+} from 'react-native-safe-area-context'
 import { useIsMounted } from '../hooks/useIsMounted'
 import { IStep, Labels, LeaderLineConfig, StepObject, Steps } from '../types'
 import * as utils from '../utilities'
@@ -29,7 +35,8 @@ const MAX_START_TRIES = 120
  * @property {React.ComponentType<TooltipProps<TCustomData>>} [tooltipComponent] Optional custom tooltip component; use when the default bubble does not match your design.
  * @property {StyleProp<ViewStyle>} [tooltipStyle] Style override applied to the default tooltip container; ignored when providing `tooltipComponent`.
  * @property {Labels} [labels] Internationalization map for the tooltip buttons; defaults to the library’s English labels.
- * @property {boolean} [androidStatusBarVisible] Toggles status bar visibility while the tour runs (Android only); defaults to the current system state.
+ * @property {boolean} [androidStatusBarVisible] @deprecated Use `statusBarOffset` instead. Indicates whether the Android status bar stays visible during a tour (used to infer offset adjustments).
+ * @property {number} [statusBarOffset] Optional manual override for status bar / safe area compensation applied to highlight positioning.
  * @property {string | boolean} [startAtMount=false] Auto-start behavior: `false` disables auto-start, `true` starts the `_default` tour, and a string starts the specified `tourKey`.
  * @property {string} [backdropColor] CSS color used for the dimmed overlay; defaults to the built-in semi-transparent black.
  * @property {number} [verticalOffset=0] Pixel offset applied to the highlighted area to fine tune tooltip positioning.
@@ -47,7 +54,11 @@ export interface TourGuideProviderProps<TCustomData = any> {
   tooltipComponent?: React.ComponentType<TooltipProps<TCustomData>>
   tooltipStyle?: StyleProp<ViewStyle>
   labels?: Labels
+  /**
+   * @deprecated Use `statusBarOffset` instead.
+   */
   androidStatusBarVisible?: boolean
+  statusBarOffset?: number
   startAtMount?: string | boolean
   backdropColor?: string
   verticalOffset?: number
@@ -72,7 +83,8 @@ export interface TourGuideProviderProps<TCustomData = any> {
  * @param {Labels} [props.labels] Optional label overrides for tooltip buttons.
  * @param {React.ComponentType<TooltipProps<TCustomData>>} [props.tooltipComponent] Custom tooltip renderer.
  * @param {StyleProp<ViewStyle>} [props.tooltipStyle] Style override for the default tooltip when `tooltipComponent` is not provided.
- * @param {boolean} [props.androidStatusBarVisible] Controls Android status bar visibility (defaults to system).
+ * @param {boolean} [props.androidStatusBarVisible] @deprecated Use `statusBarOffset` to override offsets directly.
+ * @param {number} [props.statusBarOffset] Manual override for status bar / safe area compensation.
  * @param {string} [props.backdropColor] Overlay color (defaults to built-in dimmed background).
  * @param {number} [props.animationDuration] Tooltip/mask animation duration in ms; defaults to library timing.
  * @param {number} [props.maskOffset] Extra padding around highlighted targets; defaults to `undefined` (library spacing).
@@ -105,6 +117,7 @@ export const TourGuideProvider = <TCustomData = any,>({
   tooltipComponent,
   tooltipStyle,
   androidStatusBarVisible,
+  statusBarOffset,
   backdropColor,
   animationDuration,
   maskOffset,
@@ -149,6 +162,7 @@ export const TourGuideProvider = <TCustomData = any,>({
   const [highlightedElementRef, setHighlightedElementRef] = useState<
     Ctx<React.RefObject<View> | undefined>
   >({ _default: undefined })
+  const safeAreaInsets = React.useContext(SafeAreaInsetsContext)
 
   // Function to register highlighted element ref
   const registerHighlightedElementRef = (
@@ -249,6 +263,28 @@ export const TourGuideProvider = <TCustomData = any,>({
     }
   }, [mounted, steps])
 
+  const resolvedStatusBarOffset = useMemo(() => {
+    if (typeof statusBarOffset === 'number') {
+      return statusBarOffset
+    }
+
+    if (Platform.OS === 'ios') {
+      return safeAreaInsets?.top ?? initialWindowMetrics?.insets.top ?? 0
+    }
+
+    if (Platform.OS === 'android') {
+      if (
+        androidStatusBarVisible === false ||
+        androidStatusBarVisible === undefined
+      ) {
+        return StatusBar.currentHeight ?? 0
+      }
+      return 0
+    }
+
+    return 0
+  }, [androidStatusBarVisible, safeAreaInsets?.top, statusBarOffset])
+
   const moveToCurrentStep = async (key: string) => {
     const size = await currentStep[key]?.target.measure()
 
@@ -266,7 +302,11 @@ export const TourGuideProvider = <TCustomData = any,>({
       width: size.width + OFFSET_WIDTH,
       height: size.height + OFFSET_WIDTH,
       left: Math.round(size.x) - OFFSET_WIDTH / 2,
-      top: Math.round(size.y) - OFFSET_WIDTH / 2 + (verticalOffset || 0),
+      top:
+        Math.round(size.y) -
+        OFFSET_WIDTH / 2 +
+        (verticalOffset || 0) -
+        resolvedStatusBarOffset,
     }
 
     // Execute animations sequentially to avoid conflicts between SvgMask and Modal animations
@@ -379,7 +419,9 @@ export const TourGuideProvider = <TCustomData = any,>({
     }
     setSteps((previousSteps) => {
       const newSteps = { ...previousSteps }
-      newSteps[key] = Object.entries(previousSteps[key] as StepObject<TCustomData>)
+      newSteps[key] = Object.entries(
+        previousSteps[key] as StepObject<TCustomData>,
+      )
         .filter(([key]) => key !== stepName)
         .reduce((obj, [key, val]) => Object.assign(obj, { [key]: val }), {})
       return newSteps

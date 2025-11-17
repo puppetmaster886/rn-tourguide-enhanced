@@ -273,10 +273,8 @@ export const TourGuideProvider = <TCustomData = any,>({
     }
 
     if (Platform.OS === 'android') {
-      if (
-        androidStatusBarVisible === false ||
-        androidStatusBarVisible === undefined
-      ) {
+      // Only adjust when the deprecated flag explicitly marks the status bar as hidden.
+      if (androidStatusBarVisible === false) {
         return StatusBar.currentHeight ?? 0
       }
       return 0

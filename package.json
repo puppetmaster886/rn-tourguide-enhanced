@@ -1,6 +1,6 @@
 {
   "name": "rn-tourguide-enhanced",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "description": "Make an interactive step by step tour guide for your react-native app (a rewrite of react-native-copilot)",
   "main": "index.js",
   "types": "lib/index.d.ts",

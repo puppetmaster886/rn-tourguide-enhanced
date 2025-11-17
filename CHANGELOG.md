@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.1] - 2025-11-17
+
+### Fixed
+
+- **Android Offset Regression:** Reverted the automatic subtraction on Android so highlights no longer jump upward; the library only subtracts `StatusBar.currentHeight` when you explicitly opt in via `statusBarOffset` or the legacy `androidStatusBarVisible={false}`.
+
 ## [3.8.0] - 2025-11-17
 
 ### Fixed
@@ -65,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Flexible tourKey Assignment**: Enhanced `KeyedTourGuideZone` and `KeyedTourGuideZoneByPosition` components
+
   - `tourKey` prop is now **optional** instead of omitted from the component signature
   - Allows mixing hook-level tourKey with zone-level overrides
   - Pattern: `<TourGuideZone tourKey={zoneTourKey ?? hookTourKey}>`
@@ -90,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 **State Management Changes:**
+
 - Replaced singular `tourKey` state with `activeTourKey` that tracks which tour is currently being displayed
 - `activeTourKey` is automatically updated when `setVisible()` is called
 - Modal receives tour data via `activeTourKey` instead of a global shared state
@@ -97,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **tourKey Precedence:**
 The library now supports maximum flexibility for tourKey assignment:
+
 ```typescript
 // Zone-level tourKey takes precedence over hook-level
 const { TourGuideZone } = useTourGuideController('onboarding')

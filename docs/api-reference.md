@@ -61,8 +61,8 @@ interface Labels {
   finish?: string
 }
 
-- `statusBarOffset` lets you manually override the automatically detected safe-area/status-bar compensation (useful for highly customized layouts). Leave it undefined to rely on `react-native-safe-area-context` on iOS and `StatusBar.currentHeight` on Android.
-- `androidStatusBarVisible` is retained for backwards compatibility but will be removed in a future major version—prefer configuring `statusBarOffset`.
+- `statusBarOffset` lets you override the safe-area compensation. iOS uses `react-native-safe-area-context` automatically; Android defaults to `0` because measurements already include the status bar, so only set it when you intentionally hide the bar or draw under a translucent header.
+- `androidStatusBarVisible` is retained for backwards compatibility (setting it to `false` subtracts `StatusBar.currentHeight` on Android) but will be removed in a future major version—prefer configuring `statusBarOffset`.
 ```
 
 **Example:**

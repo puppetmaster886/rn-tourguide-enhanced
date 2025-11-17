@@ -215,7 +215,7 @@ See the [Custom Tooltip Example](./docs/examples/custom-tooltip.md) for complete
 ### Status Bar & Safe Area Handling
 
 - iOS safe areas are automatically detected via `react-native-safe-area-context`; no extra configuration is required for devices with a notch or Dynamic Island.
-- Android keeps the previous `androidStatusBarVisible` prop for backwards compatibility, but you can now use the cross-platform `statusBarOffset` override when you need to force a custom offset (for example, when you render inside a translucent header).
+- Android target measurements already include the system status bar, so no offset is applied by default. Use the cross-platform `statusBarOffset` override (or keep `androidStatusBarVisible={false}` for legacy setups) whenever you hide the status bar or render under a translucent header.
 
 ```tsx
 import { StatusBar, Platform } from 'react-native'
@@ -228,7 +228,7 @@ const customOffset =
 </TourGuideProvider>
 ```
 
-> `androidStatusBarVisible` is deprecated and will be removed in a future major release—prefer the new `statusBarOffset` API.
+> `androidStatusBarVisible` is deprecated and will be removed in a future major release—prefer the new `statusBarOffset` API for custom adjustments.
 
 ### Multiple Tours & Flexible Controllers
 

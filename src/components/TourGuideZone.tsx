@@ -5,6 +5,7 @@ import {
   LeaderLineConfig,
   MaskOffset,
   Shape,
+  ScrollPosition,
   TooltipPosition,
 } from '../types'
 import { Step } from './Step'
@@ -24,6 +25,7 @@ export interface TourGuideZoneProps<TCustomData = any> {
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
   tooltipPosition?: TooltipPosition
+  scrollPosition?: ScrollPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
   tooltipCustomData?: TCustomData
@@ -43,6 +45,7 @@ export const TourGuideZone = <TCustomData = any,>({
   tooltipBottomOffset,
   tooltipLeftOffset,
   tooltipPosition,
+  scrollPosition,
   borderRadiusObject,
   leaderLineConfig,
   tooltipCustomData,
@@ -65,6 +68,7 @@ export const TourGuideZone = <TCustomData = any,>({
         tooltipBottomOffset,
         tooltipLeftOffset,
         tooltipPosition,
+        scrollPosition,
         borderRadiusObject,
         leaderLineConfig,
         tooltipCustomData,

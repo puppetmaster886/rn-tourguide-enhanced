@@ -125,12 +125,16 @@ interface TourGuideZoneProps<T = any> {
   tooltipLeftOffset?: number
   tooltipPosition?: TooltipPosition
 
+  // Scroll behavior
+  scrollPosition?: ScrollPosition  // Where to position element in viewport when scrolling
+
   // LeaderLine configuration
   leaderLineConfig?: LeaderLineConfig
 }
 
 type Shape = 'circle' | 'rectangle' | 'circle_and_keep' | 'rectangle_and_keep'
 type TooltipPosition = 'centered' | 'relative' | 'auto'
+type ScrollPosition = 'top' | 'center' | 'bottom' | 'none'
 
 interface MaskOffsetObject {
   top?: number
@@ -223,12 +227,14 @@ function MyComponent() {
 ```typescript
 interface TourGuideController {
   canStart: boolean  // Indicates if tour can start (all zones registered)
-  start: (fromStep?: number, scrollRef?: React.RefObject) => void
+  start: (fromStep?: number, scrollRef?: React.RefObject, scrollPosition?: ScrollPosition) => void
   stop: () => void
   eventEmitter: Emitter  // mitt event emitter
   tourKey?: string  // Current tour key
   TourGuideZone?: React.ComponentType<TourGuideZoneProps>  // Keyed zone component
 }
+
+type ScrollPosition = 'top' | 'center' | 'bottom' | 'none'
 ```
 
 #### Events
@@ -476,7 +482,7 @@ const AppContent = () => {
 
   React.useEffect(() => {
     if (canStart) {
-      start(1, scrollRef)  // Pass scrollRef as second parameter
+      start(1, scrollRef)  // Pass scrollRef as second parameter (defaults to top)
     }
   }, [canStart])
 
@@ -489,6 +495,41 @@ const AppContent = () => {
   )
 }
 ```
+
+#### Scroll Position Options
+
+Control where the highlighted element appears in the viewport:
+
+| Value | Description |
+|-------|-------------|
+| `'top'` | Element appears at the top of the viewport (default) |
+| `'center'` | Element is vertically centered in the viewport |
+| `'bottom'` | Element appears at the bottom of the viewport |
+| `'none'` | Disables auto-scrolling for this step |
+
+```tsx
+// Set globally when starting the tour
+start(1, scrollRef, 'center')
+
+// Or per-step (overrides the global setting)
+<TourGuideZone zone={2} text="Centered in view" scrollPosition="center">
+  <Content />
+</TourGuideZone>
+
+// Disable scrolling for a specific step
+<TourGuideZone zone={3} text="No scroll" scrollPosition="none">
+  <Content />
+</TourGuideZone>
+```
+
+#### Priority Order
+
+The scroll position is resolved in this order:
+1. Step-level `scrollPosition` prop (highest priority)
+2. `scrollPosition` passed to `start()`
+3. Default: `'top'` when a `scrollRef` is provided
+
+If you specify a `scrollPosition` but forget to pass a `scrollRef`, the library logs a warning to help you debug.
 
 ### Tooltip Positioning Strategies
 
@@ -574,6 +615,7 @@ import type {
   Labels,
   Shape,
   TooltipPosition,
+  ScrollPosition,
   LeaderLineConfig,
   Step,
   IStep,

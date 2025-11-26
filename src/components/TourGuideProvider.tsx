@@ -15,7 +15,14 @@ import {
   SafeAreaInsetsContext,
 } from 'react-native-safe-area-context'
 import { useIsMounted } from '../hooks/useIsMounted'
-import { IStep, Labels, LeaderLineConfig, StepObject, Steps } from '../types'
+import {
+  IStep,
+  Labels,
+  LeaderLineConfig,
+  ScrollPosition,
+  StepObject,
+  Steps,
+} from '../types'
 import * as utils from '../utilities'
 import { Modal } from './Modal'
 import { OFFSET_WIDTH } from './style'
@@ -130,6 +137,9 @@ export const TourGuideProvider = <TCustomData = any,>({
   leaderLineConfig,
 }: TourGuideProviderProps<TCustomData>) => {
   const [scrollRef, setScrollRef] = useState<React.RefObject<any>>()
+  const [scrollPosition, setScrollPosition] = useState<
+    Ctx<ScrollPosition | undefined>
+  >({ _default: undefined })
   const [activeTourKey, setActiveTourKey] = useState<string | undefined>(
     undefined,
   )
@@ -327,35 +337,93 @@ export const TourGuideProvider = <TCustomData = any,>({
     }
   }
 
-  const setCurrentStep = async (key: string, step?: IStep<TCustomData>) =>
-    new Promise<void>(async (resolve) => {
-      if (scrollRef && step) {
-        await step.wrapper.measureLayout(
-          findNodeHandle(scrollRef.current),
-          (_x: number, y: number, _w: number, h: number) => {
-            const yOffsett = y > 0 ? y - h / 2 : 0
-            scrollRef.current.scrollTo({ y: yOffsett, animated: false })
-          },
-        )
-        setTimeout(() => {
-          updateCurrentStep((currentStep) => {
-            const newStep = { ...currentStep }
-            newStep[key] = step
-            eventEmitter[key]?.emit('stepChange', step)
-            return newStep
+  const setCurrentStep = async (
+    key: string,
+    step?: IStep<TCustomData>,
+    manualScrollRef?: React.RefObject<any>,
+    manualScrollPosition?: ScrollPosition,
+  ): Promise<void> => {
+    const effectiveScrollRef = manualScrollRef ?? scrollRef
+
+    // Priority: step-level > manual parameter > tour-level
+    const resolvedPosition =
+      step?.scrollPosition ?? manualScrollPosition ?? scrollPosition[key]
+
+    // Determine if scrolling should occur
+    const shouldScroll =
+      effectiveScrollRef != null &&
+      step != null &&
+      resolvedPosition != null &&
+      resolvedPosition !== 'none'
+
+    // Warn if scroll position is set but no scroll ref is available
+    if (
+      resolvedPosition != null &&
+      resolvedPosition !== 'none' &&
+      !effectiveScrollRef
+    ) {
+      console.warn(
+        '[rn-tourguide-enhanced] scrollPosition is set but no scrollRef was provided. ' +
+          'Pass a scrollRef to start() to enable auto-scrolling.',
+      )
+    }
+
+    const updateStep = () => {
+      updateCurrentStep((prev) => {
+        const newStep = { ...prev, [key]: step }
+        eventEmitter[key]?.emit('stepChange', step)
+        return newStep
+      })
+    }
+
+    if (!shouldScroll) {
+      updateStep()
+      return
+    }
+
+    // Perform scroll and update step
+    return new Promise<void>((resolve) => {
+      step!.wrapper.measureLayout(
+        findNodeHandle(effectiveScrollRef!.current),
+        (_x: number, y: number, _w: number, h: number) => {
+          const viewportHeight = Dimensions.get('window').height
+          let yOffset: number
+
+          switch (resolvedPosition) {
+            case 'center':
+              // Center the element vertically in the viewport
+              yOffset = Math.max(y - (viewportHeight - h) / 2, 0)
+              break
+            case 'bottom':
+              // Position element at the bottom of the viewport
+              yOffset = Math.max(y - (viewportHeight - h), 0)
+              break
+            case 'top':
+            default:
+              // Position element at the top of the viewport
+              yOffset = Math.max(y, 0)
+              break
+          }
+
+          effectiveScrollRef!.current?.scrollTo({
+            y: yOffset,
+            animated: false,
           })
+
+          // Allow scroll to settle before updating step
+          setTimeout(() => {
+            updateStep()
+            resolve()
+          }, 100)
+        },
+        () => {
+          // Measurement failed, update step anyway
+          updateStep()
           resolve()
-        }, 100)
-      } else {
-        updateCurrentStep((currentStep) => {
-          const newStep = { ...currentStep }
-          newStep[key] = step
-          eventEmitter[key]?.emit('stepChange', step)
-          return newStep
-        })
-        resolve()
-      }
+        },
+      )
     })
+  }
 
   const getNextStep = (
     key: string,
@@ -432,11 +500,36 @@ export const TourGuideProvider = <TCustomData = any,>({
     key: string,
     fromStep?: number,
     _scrollRef?: React.RefObject<any>,
+    _scrollPosition?: ScrollPosition,
   ) => {
-    if (!scrollRef) {
+    // Store scroll ref if not already set
+    if (_scrollRef && !scrollRef) {
       setScrollRef(_scrollRef)
     }
-    const currentStep = fromStep
+
+    const effectiveScrollRef = _scrollRef ?? scrollRef
+
+    // Warn if scroll position provided without scroll ref
+    if (_scrollPosition && !effectiveScrollRef) {
+      console.warn(
+        '[rn-tourguide-enhanced] scrollPosition was provided without a scrollRef. ' +
+          'Auto-scrolling will be disabled.',
+      )
+    }
+
+    // Update scroll position for this tour key
+    if (_scrollPosition != null || effectiveScrollRef != null) {
+      setScrollPosition((prev) => {
+        const newPosition =
+          _scrollPosition ?? (effectiveScrollRef ? 'top' : undefined)
+        if (prev[key] === newPosition) {
+          return prev
+        }
+        return { ...prev, [key]: newPosition }
+      })
+    }
+
+    const targetStep = fromStep
       ? (steps[key] as StepObject<TCustomData>)[fromStep]
       : getFirstStep(key)
 
@@ -444,15 +537,20 @@ export const TourGuideProvider = <TCustomData = any,>({
       startTries.current = 0
       return
     }
-    if (!currentStep) {
+
+    if (!targetStep) {
+      // Step not yet registered, retry on next frame
       startTries.current += 1
-      requestAnimationFrame(() => start(key, fromStep))
-    } else {
-      eventEmitter[key]?.emit('start')
-      await setCurrentStep(key, currentStep!)
-      setVisible(key, true)
-      startTries.current = 0
+      requestAnimationFrame(() =>
+        start(key, fromStep, _scrollRef, _scrollPosition),
+      )
+      return
     }
+
+    eventEmitter[key]?.emit('start')
+    await setCurrentStep(key, targetStep, effectiveScrollRef, _scrollPosition)
+    setVisible(key, true)
+    startTries.current = 0
   }
   const next = () => activeTourKey && _next(activeTourKey)
   const prev = () => activeTourKey && _prev(activeTourKey)

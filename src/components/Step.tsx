@@ -4,6 +4,7 @@ import {
   LeaderLineConfig,
   MaskOffset,
   Shape,
+  ScrollPosition,
 } from '../types'
 import { ConnectedStep } from './ConnectedStep'
 import { TourGuideContext } from './TourGuideContext'
@@ -21,6 +22,7 @@ interface Props<TCustomData = any> {
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
+  scrollPosition?: ScrollPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
   tooltipCustomData?: TCustomData

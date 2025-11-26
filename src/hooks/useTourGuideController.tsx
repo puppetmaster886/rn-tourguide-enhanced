@@ -6,13 +6,14 @@ import {
   TourGuideZoneByPosition,
   TourGuideZoneByPositionProps,
 } from '../components/TourGuideZoneByPosition'
+import type { ScrollPosition } from '../types'
 
 /**
  * Creates a keyed controller that starts, stops, and observes onboarding tours from React components.
  *
  * @param {string} [tourKey='_default'] Optional identifier that scopes the controller to a specific tour; `_default` lets you control the primary tour instance.
  * @returns {object} controller API bound to the requested `tourKey`.
- * @property {(fromStep?: number, scrollRef?: React.RefObject<any>) => void} controller.start Imperative starter that optionally jumps to `fromStep` (defaults to the first zone) and can sync with a `scrollRef`.
+ * @property {(fromStep?: number, scrollRef?: React.RefObject<any>, scrollPosition?: ScrollPosition) => void} controller.start Imperative starter that optionally jumps to `fromStep`, can sync with a `scrollRef`, and can request scroll alignment (`top` | `middle` | `bottom` | `none`; defaults to `top` when a `scrollRef` is provided).
  * @property {() => void} controller.stop Stops the currently running tour for the bound `tourKey`.
  * @property {import('mitt').Emitter | undefined} controller.eventEmitter Shared mitt emitter for listening to `start`, `stop`, and `stepChange` events.
  * @property {() => import('../types').IStep | undefined} controller.getCurrentStep Retrieves the latest rendered step for the current tour, if any.
@@ -41,9 +42,13 @@ export const useTourGuideController = (tourKey?: string) => {
 
   const key = tourKey ?? '_default'
 
-  const _start = (fromStep?: number, scrollRef?: React.RefObject<any>) => {
+  const _start = (
+    fromStep?: number,
+    scrollRef?: React.RefObject<any>,
+    scrollPosition?: ScrollPosition,
+  ) => {
     if (start) {
-      start(key, fromStep, scrollRef)
+      start(key, fromStep, scrollRef, scrollPosition)
     }
   }
   const _stop = () => {

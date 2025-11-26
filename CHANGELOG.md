@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.3] - 2025-11-26
+
+### Added
+
+- **Configurable Scroll Alignment**: Control where highlighted elements appear in the viewport during auto-scroll
+  - Pass `scrollPosition` as third argument to `start(fromStep, scrollRef, scrollPosition)`
+  - Or set per-step via `scrollPosition` prop on `TourGuideZone` / `TourGuideZoneByPosition`
+  - Options: `'top'` (default), `'center'`, `'bottom'`, or `'none'` to disable scrolling
+  - Step-level settings override tour-level settings
+  - Helpful warning logged if `scrollPosition` is set without a `scrollRef`
+
+### Changed
+
+- **Simplified ScrollPosition Type**: Removed redundant `'middle'` alias, use `'center'` instead
+- **Improved Code Quality**: Refactored scroll logic for better readability and maintainability
+  - Clearer variable naming and comments
+  - Better separation of concerns in `setCurrentStep`
+  - Switch statement for scroll position handling
+
 ## [3.8.2] - 2025-11-26
 
 ### Changed

@@ -10,6 +10,17 @@ export type TooltipPosition =
   | 'relative' // Always position relative to highlighted element (original rn-tourguide behavior)
   | 'auto' // Auto-detect: center if no overlap, relative if overlap (default)
 
+/**
+ * Controls where the highlighted element should be positioned within the viewport
+ * when auto-scrolling is enabled.
+ *
+ * - `'top'` - Scrolls so the element appears at the top of the viewport (default)
+ * - `'center'` - Scrolls so the element is vertically centered
+ * - `'bottom'` - Scrolls so the element appears at the bottom of the viewport
+ * - `'none'` - Disables auto-scrolling for this step
+ */
+export type ScrollPosition = 'top' | 'center' | 'bottom' | 'none'
+
 // Import official types from react-native-leader-line instead of defining our own
 import type { LeaderLineProps } from 'react-native-leader-line'
 
@@ -42,6 +53,7 @@ export interface IStep<TCustomData = any> {
   tooltipBottomOffset?: number
   tooltipLeftOffset?: number
   tooltipPosition?: TooltipPosition
+  scrollPosition?: ScrollPosition
   borderRadiusObject?: BorderRadiusObject
   leaderLineConfig?: LeaderLineConfig
   tooltipCustomData?: TCustomData

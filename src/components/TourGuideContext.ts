@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { View } from 'react-native'
-import { IStep } from '../types'
+import { IStep, ScrollPosition } from '../types'
 
 export type Handler = (event?: any) => void
 export interface Emitter {
@@ -16,7 +16,12 @@ export interface ITourGuideContext<TCustomData = any> {
   registerStep?(key: string, step: IStep<TCustomData>): void
   unregisterStep?(key: string, stepName: string): void
   getCurrentStep?(key: string): IStep<TCustomData> | undefined
-  start?(key: string, fromStep?: number, scrollRef?: React.RefObject<any>): void
+  start?(
+    key: string,
+    fromStep?: number,
+    scrollRef?: React.RefObject<any>,
+    scrollPosition?: ScrollPosition,
+  ): void
   stop?(key: string): void
   registerHighlightedElementRef?(key: string, ref: React.RefObject<View>): void
   unregisterHighlightedElementRef?(key: string): void

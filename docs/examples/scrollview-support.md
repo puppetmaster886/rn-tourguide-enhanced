@@ -21,7 +21,7 @@ const AppContent = () => {
 
   React.useEffect(() => {
     if (canStart) {
-      start(1, scrollRef) // Pass scrollRef as second parameter
+      start(1, scrollRef) // Pass scrollRef as second parameter (defaults to top alignment)
     }
   }, [canStart])
 
@@ -72,6 +72,22 @@ The tour guide will automatically:
 - Calculate the optimal scroll position
 - Smoothly scroll to make the step visible
 - Show the tooltip once scrolling completes
+
+You can control alignment per start call or per step:
+
+```tsx
+start(1, scrollRef, 'center') // center the element in viewport
+
+<TourGuideZone zone={2} text="Bottom aligned" scrollPosition="bottom">
+  <Content />
+</TourGuideZone>
+```
+
+Available `scrollPosition` values:
+- `'top'` - Element at the top of viewport (default)
+- `'center'` - Element centered vertically in viewport
+- `'bottom'` - Element at the bottom of viewport
+- `'none'` - Disable auto-scrolling for this step
 
 ## Manual Control
 

@@ -1,6 +1,11 @@
 import * as React from 'react'
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
-import { BorderRadiusObject, Shape, TooltipPosition } from '../types'
+import {
+  BorderRadiusObject,
+  ScrollPosition,
+  Shape,
+  TooltipPosition,
+} from '../types'
 import { TourGuideZone } from './TourGuideZone'
 
 export interface TourGuideZoneByPositionProps<TCustomData = any> {
@@ -19,6 +24,7 @@ export interface TourGuideZoneByPositionProps<TCustomData = any> {
   keepTooltipPosition?: boolean
   tooltipBottomOffset?: number
   tooltipPosition?: TooltipPosition
+  scrollPosition?: ScrollPosition
   text?: string
   tooltipCustomData?: TCustomData
 }
@@ -38,6 +44,7 @@ export const TourGuideZoneByPosition = <TCustomData = any,>({
   keepTooltipPosition,
   tooltipBottomOffset,
   tooltipPosition,
+  scrollPosition,
   borderRadiusObject,
   text,
   tooltipCustomData,
@@ -60,6 +67,7 @@ export const TourGuideZoneByPosition = <TCustomData = any,>({
           keepTooltipPosition,
           tooltipBottomOffset,
           tooltipPosition,
+          scrollPosition,
           borderRadiusObject,
           text,
           tooltipCustomData,

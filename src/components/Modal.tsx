@@ -24,6 +24,7 @@ declare var __TEST__: boolean
 
 // Import official types and components from react-native-leader-line
 import type {
+  LeaderLineProps,
   PlugType,
   SocketPosition,
   PathType,
@@ -31,7 +32,7 @@ import type {
 import { LeaderLine as OriginalLeaderLine } from 'react-native-leader-line'
 
 // Wrapper para LeaderLine
-const LeaderLine: React.FC<any> = (props) => {
+const LeaderLine: React.FC<LeaderLineProps> = (props) => {
   return React.createElement(OriginalLeaderLine, props)
 }
 

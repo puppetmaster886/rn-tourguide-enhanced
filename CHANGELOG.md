@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.2] - 2025-11-26
+
+### Changed
+
+- Updated `react-native-leader-line` to **1.8.0** to pick up its peer-dependency fix that prevents duplicate React copies when consuming the tour guide.
+
 ## [3.8.1] - 2025-11-17
 
 ### Fixed
